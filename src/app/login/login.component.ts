@@ -1,5 +1,5 @@
 import { AfterViewInit, Component, inject, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { environment } from 'src/environments/environment';
 import { AuthService } from '../auth.service';
 import { FormsModule } from '@angular/forms';
@@ -9,7 +9,7 @@ import { SecureTokenStore } from '../secure-token.store';
 
 @Component({
     selector: 'app-login',
-    imports: [CommonModule, FormsModule, RouterLink],
+    imports: [FormsModule, RouterLink],
     templateUrl: './login.component.html',
     styleUrls: ['./login.component.scss']
 })

@@ -1,25 +1,27 @@
 <section class="subscriptions-section">
-<div class="subscriptionCard" *ngFor="let subscription of subscriptions">
-    <div class="subscription-header">
+  @for (subscription of subscriptions; track subscription) {
+    <div class="subscriptionCard">
+      <div class="subscription-header">
         <div class="subscription-name-status">
-            <p class="status" [ngClass]="'status-' + subscription.status">
-                <span class="dot"></span>
-                {{ getStatusLabel(subscription.status) }}
-            </p>
-            <h2>{{ subscription.name }}</h2>
+          <p class="status" [ngClass]="'status-' + subscription.status">
+            <span class="dot"></span>
+            {{ getStatusLabel(subscription.status) }}
+          </p>
+          <h2>{{ subscription.name }}</h2>
         </div>
         <p class="subscription-price">{{ subscription.price | currency: subscription.currency }}</p>
-    </div>
-    <div class="subscription-details">
+      </div>
+      <div class="subscription-details">
         <div class="payment-info">
-            <p>{{ subscription.cardBank }}</p>
-            <p>Cartão de final: {{ subscription.cardFinalNumbers }}</p>
+          <p>{{ subscription.cardBank }}</p>
+          <p>Cartão de final: {{ subscription.cardFinalNumbers }}</p>
         </div>
         <p class="billing-date">Dia de Vencimento: {{ subscription.billingDay }}</p>
-    </div>
-    <div class="subscription-footer">
+      </div>
+      <div class="subscription-footer">
         <p class="next-date">Próxima cobrança:</p>
         <p class="next-date">{{ subscription.nextPayment | date: 'dd/MM' }}</p>
+      </div>
     </div>
-</div>
+  }
 </section>

@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { RouterOutlet } from '@angular/router';
 import { Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
@@ -8,7 +8,7 @@ import { environment } from 'src/environments/environment';
 
 @Component({
     selector: 'app-root',
-    imports: [CommonModule, RouterOutlet],
+    imports: [RouterOutlet],
     templateUrl: './app.component.html',
     styleUrls: ['./app.component.scss']
 })
