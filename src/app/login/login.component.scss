@@ -1,0 +1,174 @@
+@import '../app.component.scss';
+
+.div-logo {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 8rem 0 2rem 0; // posição final
+  animation: logo-move-from-center 1200ms ease-out forwards;
+}
+
+.form-login {
+  opacity: 0;
+  transform: translateY(16px);
+  will-change: transform, opacity;
+  animation: form-up 1500ms ease-out 2000ms forwards; // começa após a rotação
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 0 2rem;
+}
+
+/* ====== Animações ====== */
+$spin-duration: 2000ms; // rotação da logo
+/* form começa quando a rotação termina (delay de 2000ms ali acima) */
+
+/* Logo gira */
+.div-logo img {
+  display: block;
+  margin: 0 auto;
+  transform-origin: center;
+  will-change: transform, opacity;
+  animation: logo-spin $spin-duration ease-out forwards;
+}
+
+@keyframes logo-move-from-center {
+  /* Logo começa no meio da viewport:
+     50vh - metade da altura da logo (96px -> 48px) */
+  0%   { padding-top: calc(50vh - 48px); padding-bottom: 0; }
+  100% { padding-top: 8rem;               padding-bottom: 2rem; }
+}
+
+@keyframes logo-spin {
+  0%   { transform: rotate(0deg) scale(3);   opacity: 1; }
+  80%  { transform: rotate(360deg) scale(3); opacity: 1; }
+  100% { transform: rotate(0deg) scale(1); opacity: 1; }
+}
+
+@keyframes form-up {
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Acessibilidade: reduz animações se o usuário preferir */
+@media (prefers-reduced-motion: reduce) {
+  .div-logo,
+  .div-logo img,
+  .form-login {
+    animation: none !important;
+    opacity: 1;
+    transform: none;
+    padding: 8rem 0 2rem 0;
+  }
+}
+
+/* ====== (restante do seu estilo) ====== */
+
+.form-input {
+  position: relative;
+  max-width: 100%;
+  background-color: #e9e9e9;
+  border-radius: 4px 4px 0 0;
+  border-bottom: 1px solid #2c2c2c;
+}
+
+.form-input input {
+  border: none;
+  background-color: transparent;
+  width: 98.5%;
+  height: 48px;
+  padding-left: 8px;
+}
+
+.form-input:focus-within { background-color: transparent; }
+
+.form-input:focus-within p {
+  top: -8px;
+  left: 5px;
+  font-size: 0.8rem;
+  background-color: white;
+  padding: 0 5px;
+  color: #2c2c2c;
+}
+
+.form-input:focus-within p,
+.form-input input:not(:placeholder-shown) + p {
+  top: -8px;
+  left: 5px;
+  font-size: 0.8rem;
+  background-color: white;
+  padding: 0 5px;
+  color: #2c2c2c;
+}
+
+.form-input p {
+  position: absolute;
+  top: 16px;
+  left: 10px;
+  transition: all 0.3s ease-in-out;
+  margin: 0;
+  color: #2c2c2c;
+  font-size: 16px;
+}
+
+.login-button {
+    height: 48px;
+    background-color: #2c2c2c;
+    color: white;
+    border: none;
+    font-size: 16px;
+    font-weight: 700;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.divider {
+  display: flex;
+  align-items: center;
+  margin: 1rem 0;
+}
+
+.divider p { margin: 0 8px; }
+
+.divider hr {
+  flex: 1;
+  border: none;
+  border-top: 1px solid #2c2c2c;
+}
+
+.google-button {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  align-items: center;
+  border: none;
+  background-color: #e9e9e9;
+  border-radius: 999px;
+  padding: 8px;
+  width: 100%;
+}
+
+.login-title {
+    text-align: center;
+    margin: 0;
+    font-size: 1.5rem;
+}
+
+.forget-password {
+    color: #2c2c2c !important;
+    font-size: 16px;
+    font-weight: 500;
+    margin: 8px 0 16px 0;
+    text-decoration: underline;
+}
+
+.register-prompt {
+    font-size: 14px;
+    color: #2c2c2c;
+    text-align: center;
+}
+
+.register-prompt a {
+    font-weight: 600;
+    text-decoration: underline;
+    color: #2c2c2c !important;
+}

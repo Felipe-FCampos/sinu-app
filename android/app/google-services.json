@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "709181442903",
+    "project_id": "sinu-d5ca8",
+    "storage_bucket": "sinu-d5ca8.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:709181442903:android:195563bfe0f9b9de844c12",
+        "android_client_info": {
+          "package_name": "com.sinu.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "709181442903-33vdvt4jl3jhv8jtak6ek0fb9obn1fue.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.sinu.app",
+            "certificate_hash": "82877a8db7dfecf23ed5d18beb739ee516b21f5b"
+          }
+        },
+        {
+          "client_id": "709181442903-cqluj5s9felt6qgg2hohd8nkc2ov6oo5.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA2K2oTHVBOw55WH81OBe3i2quqpeiDAxs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "709181442903-cqluj5s9felt6qgg2hohd8nkc2ov6oo5.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
