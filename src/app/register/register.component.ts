@@ -8,11 +8,10 @@ import { Capacitor } from '@capacitor/core';
 import { SecureTokenStore } from '../secure-token.store'; 
 
 @Component({
-  selector: 'app-register',
-  standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink],
-  templateUrl: './register.component.html',
-  styleUrls: ['./register.component.scss']
+    selector: 'app-register',
+    imports: [CommonModule, FormsModule, RouterLink],
+    templateUrl: './register.component.html',
+    styleUrls: ['./register.component.scss']
 })
 export class RegisterComponent {
   title = 'sinu-angular';

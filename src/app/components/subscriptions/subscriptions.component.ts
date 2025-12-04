@@ -26,11 +26,10 @@ export interface Subscription {
 }
 
 @Component({
-  selector: 'app-subscriptions',
-  standalone: true,
-  imports: [CommonModule],
-  templateUrl: './subscriptions.component.html',
-  styleUrls: ['./subscriptions.component.scss']
+    selector: 'app-subscriptions',
+    imports: [CommonModule],
+    templateUrl: './subscriptions.component.html',
+    styleUrls: ['./subscriptions.component.scss']
 })
 export class SubscriptionsComponent {
   subscriptions: Subscription[] = [

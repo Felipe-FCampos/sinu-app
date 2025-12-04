@@ -5,11 +5,10 @@ import { UserData } from '../../user.service';
 import { SubscriptionsComponent } from 'src/app/components/subscriptions/subscriptions.component';
 
 @Component({
-  selector: 'app-home',
-  standalone: true,
-  imports: [CommonModule, SubscriptionsComponent],
-  templateUrl: './home.component.html',
-  styleUrls: ['./home.component.scss']
+    selector: 'app-home',
+    imports: [CommonModule, SubscriptionsComponent],
+    templateUrl: './home.component.html',
+    styleUrls: ['./home.component.scss']
 })
 export class HomeComponent implements OnInit{
 
