@@ -7,10 +7,10 @@ import { AuthService } from './auth.service';
 import { environment } from 'src/environments/environment';
 
 @Component({
-    selector: 'app-root',
-    imports: [RouterOutlet],
-    templateUrl: './app.component.html',
-    styleUrls: ['./app.component.scss']
+  selector: 'app-root',
+  imports: [RouterOutlet],
+  templateUrl: './app.component.html',
+  styleUrls: ['./app.component.scss']
 })
 export class AppComponent implements OnInit {
 
@@ -18,15 +18,15 @@ export class AppComponent implements OnInit {
 
   constructor(
     private router: Router,
-    private http: HttpClient, 
+    private http: HttpClient,
     private auth: AuthService
-  ) {}
+  ) { }
 
   ngOnInit() {
     this.http.post<{ idToken: string }>(`${this.apiUrl}/auth/refresh`, {}, { withCredentials: true })
-    .subscribe({
-      next: r => this.auth['token$']?.next(r.idToken),
-      error: () => this.auth['token$']?.next(null)
-    });
+      .subscribe({
+        next: r => this.auth['token$']?.next(r.idToken),
+        error: () => this.auth['token$']?.next(null)
+      });
   }
 }
