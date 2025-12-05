@@ -1,27 +1,139 @@
 <section class="subscriptions-section">
-  @for (subscription of subscriptions; track subscription) {
-    <div class="subscriptionCard">
-      <div class="subscription-header">
-        <div class="subscription-name-status">
-          <p class="status" [ngClass]="'status-' + subscription.status">
-            <span class="dot"></span>
-            {{ getStatusLabel(subscription.status) }}
-          </p>
-          <h2>{{ subscription.name }}</h2>
-        </div>
-        <p class="subscription-price">{{ subscription.price | currency: subscription.currency }}</p>
+  @for (subscription of subscriptions; track subscription.id) {
+  <div class="subscriptionCard">
+    <div class="subscription-header">
+      <div class="subscription-name-status">
+        <p class="status" [ngClass]="'status-' + subscription.status">
+          <span class="dot"></span>
+          {{ getStatusLabel(subscription.status) }}
+        </p>
+        <h2>{{ subscription.name }}</h2>
       </div>
-      <div class="subscription-details">
-        <div class="payment-info">
-          <p>{{ subscription.cardBank }}</p>
-          <p>Cartão de final: {{ subscription.cardFinalNumbers }}</p>
-        </div>
-        <p class="billing-date">Dia de Vencimento: {{ subscription.billingDay }}</p>
-      </div>
-      <div class="subscription-footer">
-        <p class="next-date">Próxima cobrança:</p>
-        <p class="next-date">{{ subscription.nextPayment | date: 'dd/MM' }}</p>
-      </div>
+      <p class="subscription-price">
+        {{ subscription.price / 100
+        | currency: subscription.currency : 'symbol' : undefined : getLocaleByCurrency(subscription.currency) }}
+      </p>
     </div>
+
+    <div class="subscription-details">
+      <div class="payment-info">
+        <p>{{ subscription.cardBank }}</p>
+        <p>Cartão de final: {{ subscription.cardFinalNumbers }}</p>
+      </div>
+      <p class="billing-date">Dia de Vencimento: {{ subscription.billingDay }}</p>
+    </div>
+
+    <div class="subscription-footer">
+      <p class="next-date">Próxima cobrança:</p>
+      <p class="next-date">
+        {{ subscription.nextPayment | date:'dd/MM' }}
+      </p>
+    </div>
+  </div>
   }
+  <button class="add-subscription-button" (click)="openAddSubscriptionForm()">+</button>
+  <section style="display: none;" class="add-subscription-section">
+    <div class="add-subscription-header">
+      <h2>Adicionar Nova Assinatura</h2>
+      <button class="close-button" (click)="closeAddSubscriptionForm()">X</button>
+    </div>
+
+    <form (ngSubmit)="addSubscription()">
+      <div class="name-container">
+        <label for="name">Nome:</label>
+        <input id="name" [(ngModel)]="newSubscription.name" name="name" required />
+      </div>
+
+      <div class="price-currency-container">
+        <div class="price-currency-group">
+          <label for="price">Preço (em centavos):</label>
+          <input id="price" type="number" [(ngModel)]="newSubscription.price" name="price" required />
+        </div>
+
+        <div class="price-currency-group">
+          <label for="currency">Moeda:</label>
+          <select id="currency" [(ngModel)]="newSubscription.currency" name="currency" required>
+            <option value="BRL">Real (BRL)</option>
+            <option value="USD">Dólar (USD)</option>
+            <option value="EUR">Euro (EUR)</option>
+            <option value="GBP">Libra (GBP)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="subscription-type-container">
+        <label for="subscriptionType">Tipo de Assinatura:</label>
+        <select id="subscriptionType" [(ngModel)]="newSubscription.subscriptionType" name="subscriptionType" required>
+          <option value="STREAMING">Streaming</option>
+          <option value="SOFTWARE">Software</option>
+          <option value="GAMING">Gaming</option>
+        </select>
+      </div>
+
+      <hr />
+
+      <div class="billingFrequency-container">
+        <label for="billingFrequency">Frequência de Cobrança:</label>
+        <select id="billingFrequency" [(ngModel)]="newSubscription.billingFrequency" name="billingFrequency" required>
+          <option value="MONTHLY">Mensal</option>
+          <option value="QUARTERLY">Trimestral</option>
+          <option value="SEMESTRAL">Semestral</option>
+          <option value="ANNUAL">Anual</option>
+        </select>
+      </div>
+
+      <div class="billing-day-container">
+        <label for="billingDay">Dia de Cobrança:</label>
+        <select id="billingDay" [(ngModel)]="newSubscription.billingDay" name="billingDay" required>
+          <option *ngFor="let day of days" [value]="day">{{ day }}</option>
+        </select>
+      </div>
+
+      <div class="payment-method-container">
+        <label for="paymentMethod">Forma de Pagamento:</label>
+        <select id="paymentMethod" [(ngModel)]="newSubscription.paymentMethod" name="paymentMethod" required>
+          <option value="CREDIT_CARD">Cartão de Crédito</option>
+          <option value="DEBIT_CARD">Cartão de Débito</option>
+          <option value="PIX">Pix</option>
+          <option value="BOLETO">Boleto</option>
+          <option value="BANK_TRANSFER">Transferência Bancária</option>
+        </select>
+      </div>
+
+      <div class="card-info-container">
+        <div class="card-bank-container">
+          <label for="cardBank">Banco:</label>
+          <select id="cardBank" [(ngModel)]="newSubscription.cardBank" name="cardBank" required>
+            <option value="Banco do Brasil">Banco do Brasil</option>
+            <option value="Caixa Econômica">Caixa Econômica</option>
+            <option value="Itaú">Itaú</option>
+            <option value="Bradesco">Bradesco</option>
+            <option value="Santander">Santander</option>
+            <option value="Nubank">Nubank</option>
+          </select>
+        </div>
+
+        <div class="card-last-numbers-container">
+          <label for="cardLastNumbers">Últimos Números do Cartão:</label>
+          <input id="cardLastNumbers" [(ngModel)]="newSubscription.cardFinalNumbers" name="cardLastNumbers" required />
+        </div>
+      </div>
+
+      <button type="submit" [disabled]="isSubmitting">
+        {{ isSubmitting ? 'Adicionando...' : 'Adicionar Assinatura' }}
+      </button>
+    </form>
+    <div class="loader-overlay" *ngIf="isSubmitting">
+      <div class="spinner"></div>
+    </div>
+  </section>
+  <div style="display: none;" class="div_background_modal"></div>
 </section>
+
+<div class="success-modal" *ngIf="showSuccess">
+  <div class="success-modal-backdrop"></div>
+  <div class="success-modal-content">
+    <p>Assinatura adicionada com sucesso!</p>
+    <button (click)="showSuccess = false">OK</button>
+  </div>
+</div>

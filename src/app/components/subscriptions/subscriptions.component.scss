@@ -107,3 +107,282 @@
 .status-2 { background-color: rgba(255, 165, 0, 0.2); }  // pendente
 .status-3 { background-color: rgba(255, 0, 0, 0.2); }     // vencido
 .status-0 { background-color: rgba(128, 128, 128, 0.2); }    // desativado
+
+
+.add-subscription-section {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: #ffffff;
+  box-shadow: 0px 3px 6px rgba(0, 0, 0, 0.3);
+  border-radius: 8px;
+  padding: 24px;
+  z-index: 1000;
+
+  width: 90vw;             // ocupa 90% da largura da tela
+  max-width: 480px;        // limite máximo pro modal
+  box-sizing: border-box;
+
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+
+  & hr {
+    background-color: #2c2c2c;
+    width: 100%;
+    height: 1px;
+    border: none;
+  }
+}
+
+.add-subscription-section h2 {
+  margin: 0 0 8px;
+}
+
+.add-subscription-section form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* botão de fechar */
+.add-subscription-section > button {
+  align-self: flex-end;
+  border: none;
+  background: transparent;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+/* containers de campos */
+
+.name-container,
+.subscription-type-container,
+.billing-day-container {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+/* Preço + moeda lado a lado */
+.price-currency-container, .card-info-container {
+  display: flex;
+  gap: 12px;
+}
+
+.price-currency-group {
+  flex: 1;           // divide espaço igualmente
+  min-width: 0;
+}
+
+/* inputs e labels */
+
+.add-subscription-section label {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.add-subscription-section input {
+  width: 100%;
+  padding: 8px 10px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+  box-sizing: border-box;
+}
+
+/* botão salvar */
+.add-subscription-section button[type="submit"] {
+  margin-top: 8px;
+  width: 100%;
+  padding: 10px 0;
+  border-radius: 6px;
+  border: none;
+  background-color: #111;
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.add-subscription-section button[type="submit"]:hover {
+  background-color: #333;
+}
+
+/* Estilo para os dropdowns (select) */
+.add-subscription-section select {
+  width: 100%;
+  padding: 8px 10px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+  box-sizing: border-box;
+  background-color: #fff;
+  font-size: 14px;
+  font-weight: 500;
+  color: #2c2c2c;
+  appearance: none; /* Remove o estilo padrão do dropdown */
+  background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg xmlns%3D%22http%3A//www.w3.org/2000/svg%22 width%3D%2210%22 height%3D%225%22 viewBox%3D%220 0 10 5%22%3E%3Cpath fill%3D%22%232c2c2c%22 d%3D%22M0 0l5 5 5-5z%22/%3E%3C/svg%3E');
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  background-size: 10px 5px;
+}
+
+/* Ajuste para os containers que possuem dropdowns */
+.price-currency-group,
+.subscription-type-container,
+.billingFrequency-container,
+.card-bank-container {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+/* Estilo para os labels */
+.add-subscription-section label {
+  font-size: 14px;
+  font-weight: 500;
+  color: #2c2c2c;
+}
+
+/* Hover e foco nos dropdowns */
+.add-subscription-section select:hover,
+.add-subscription-section select:focus {
+  border-color: #111;
+  outline: none;
+}
+
+.payment-method-container select {
+  width: 100%;
+  padding: 8px 10px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+  box-sizing: border-box;
+  background-color: #fff;
+  font-size: 14px;
+  font-weight: 500;
+  color: #2c2c2c;
+  appearance: none;
+  background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg xmlns%3D%22http%3A//www.w3.org/2000/svg%22 width%3D%2210%22 height%3D%225%22 viewBox%3D%220 0 10 5%22%3E%3Cpath fill%3D%22%232c2c2c%22 d%3D%22M0 0l5 5 5-5z%22/%3E%3C/svg%3E');
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  background-size: 10px 5px;
+}
+
+.payment-method-container select:hover,
+.payment-method-container select:focus {
+  border-color: #111;
+  outline: none;
+}
+
+.div_background_modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100vh;
+    background-color: #2c2c2c58;
+}
+
+/* overlay do loader dentro do modal */
+.loader-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+}
+
+/* spinner simples */
+.spinner {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 4px solid #ccc;
+  border-top-color: #111;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* modal de sucesso */
+.success-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 1100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.success-modal-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.35);
+}
+
+.success-modal-content {
+  position: relative;
+  background: #fff;
+  padding: 16px 24px;
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+  z-index: 1101;
+  text-align: center;
+  min-width: 260px;
+}
+
+.success-modal-content p {
+  margin: 0 0 12px;
+  font-weight: 500;
+}
+
+.success-modal-content button {
+  padding: 8px 16px;
+  border-radius: 6px;
+  border: none;
+  background: #111;
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+
+.add-subscription-button {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    border: none;
+    font-size: 44px;
+    background-color: #111;
+    color: #fff;
+    font-weight: 300;
+    cursor: pointer;
+    align-self: flex-start;
+    position: fixed;
+    bottom: 20%;
+    right: 20px;
+}
+
+.close-button {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    border: none;
+    font-size: 20px;
+    background-color: #ff0000d1;
+    color: #fff;
+    font-weight: 400;
+    margin-top: -8px;
+}
+
+.add-subscription-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
