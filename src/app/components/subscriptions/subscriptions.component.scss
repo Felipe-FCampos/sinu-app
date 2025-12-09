@@ -109,7 +109,7 @@
 .status-0 { background-color: rgba(128, 128, 128, 0.2); }    // desativado
 
 
-.add-subscription-section {
+.add-subscription-section, .update-subscription-section {
   position: fixed;
   top: 50%;
   left: 50%;
@@ -136,18 +136,18 @@
   }
 }
 
-.add-subscription-section h2 {
+.add-subscription-section h2, .update-subscription-section h2 {
   margin: 0 0 8px;
 }
 
-.add-subscription-section form {
+.add-subscription-section form, .update-subscription-section form {
   display: flex;
   flex-direction: column;
   gap: 16px;
 }
 
 /* botão de fechar */
-.add-subscription-section > button {
+.add-subscription-section > button, .update-subscription-section > button {
   align-self: flex-end;
   border: none;
   background: transparent;
@@ -178,12 +178,12 @@
 
 /* inputs e labels */
 
-.add-subscription-section label {
+.add-subscription-section label, .update-subscription-section label {
   font-size: 14px;
   font-weight: 500;
 }
 
-.add-subscription-section input {
+.add-subscription-section input, .update-subscription-section input {
   width: 100%;
   padding: 8px 10px;
   border-radius: 4px;
@@ -192,7 +192,7 @@
 }
 
 /* botão salvar */
-.add-subscription-section button[type="submit"] {
+.add-subscription-section button[type="submit"], .update-subscription-section button[type="submit"] {
   margin-top: 8px;
   width: 100%;
   padding: 10px 0;
@@ -205,12 +205,12 @@
   transition: background-color 0.3s ease;
 }
 
-.add-subscription-section button[type="submit"]:hover {
+.add-subscription-section button[type="submit"]:hover, .update-subscription-section button[type="submit"]:hover {
   background-color: #333;
 }
 
 /* Estilo para os dropdowns (select) */
-.add-subscription-section select {
+.add-subscription-section select, .update-subscription-section select {
   width: 100%;
   padding: 8px 10px;
   border-radius: 4px;
@@ -238,7 +238,7 @@
 }
 
 /* Estilo para os labels */
-.add-subscription-section label {
+.add-subscription-section label, .update-subscription-section label {
   font-size: 14px;
   font-weight: 500;
   color: #2c2c2c;
@@ -246,7 +246,9 @@
 
 /* Hover e foco nos dropdowns */
 .add-subscription-section select:hover,
-.add-subscription-section select:focus {
+.add-subscription-section select:focus,
+.update-subscription-section select:hover,
+.update-subscription-section select:focus {
   border-color: #111;
   outline: none;
 }
@@ -370,19 +372,40 @@
 }
 
 .close-button {
-    width: 24px;
-    height: 24px;
+    background-color: transparent;
     border-radius: 50%;
     border: none;
-    font-size: 20px;
-    background-color: #ff0000d1;
-    color: #fff;
-    font-weight: 400;
-    margin-top: -8px;
 }
 
-.add-subscription-header {
+.add-subscription-header, .update-subscription-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
+}
+
+.no-subscriptions-message {
+  text-align: center;
+  padding: 50px 20px;
+  color: #2c2c2c;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  min-height: 200px;
+
+  p {
+    margin: 5px 0;
+    font-size: 18px;
+    font-weight: 500;
+  }
+}
+
+.delete-button {
+    background-color: #ff4d4d;
+    border: none;
+    color: white;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 600;
 }

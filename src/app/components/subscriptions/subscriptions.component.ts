@@ -5,6 +5,7 @@ import localePt from '@angular/common/locales/pt';
 import localeDe from '@angular/common/locales/de'; // Exemplo se você mapear 'EUR' para 'de-DE'
 import { CreateSubscriptionPayload, SubscriptionsService } from 'src/app/subscriptions.service';
 import { FormsModule } from '@angular/forms';
+import { CurrencyMaskDirective } from '../../currency-mask.directive'; // 1. Importe a diretiva
 
 registerLocaleData(localePt, 'pt-BR');
 registerLocaleData(localeDe, 'de-DE');
@@ -35,7 +36,12 @@ export interface Subscription {
 
 @Component({
   selector: 'app-subscriptions',
-  imports: [CommonModule, FormsModule],
+  standalone: true, // Assumindo que seu componente é standalone
+  imports: [
+    CommonModule,
+    FormsModule,
+    CurrencyMaskDirective // 2. Adicione a diretiva aqui
+  ],
   templateUrl: './subscriptions.component.html',
   styleUrls: ['./subscriptions.component.scss']
 })
@@ -43,10 +49,14 @@ export class SubscriptionsComponent implements OnInit {
 
   constructor(private subscriptionsService: SubscriptionsService) { }
 
+  editingSubscriptionId: string | null = null;
+
   subscriptions: Subscription[] = [];
 
   isSubmitting = false;   // 👈 loader
-  showSuccess = false;    // 👈 modal de sucesso
+  showSuccess = false;    // 👈 modal de sucesso para ADIÇÃO
+  showUpdateSuccess = false; // 👈 modal de sucesso para ATUALIZAÇÃO
+  showDeleteSuccess = false; // 👈 modal de sucesso para EXCLUSÃO
 
   days: number[] = Array.from({ length: 30 }, (_, i) => i + 1); // Gera os dias de 1 a 30
 
@@ -115,11 +125,14 @@ export class SubscriptionsComponent implements OnInit {
     }
   }
 
+  // Open and close subscription form for adding a new subscription
+
   openAddSubscriptionForm() {
     const forms = document.querySelector('.add-subscription-section') as HTMLElement;
     const div = document.querySelector('.div_background_modal') as HTMLElement;
     div.style.display = 'block';
     forms.style.display = 'block';
+    this.resetNewSubscription();
   }
 
   closeAddSubscriptionForm() {
@@ -128,7 +141,83 @@ export class SubscriptionsComponent implements OnInit {
     div.style.display = 'none';
     forms.style.display = 'none';
     this.isSubmitting = false;
+    this.resetNewSubscription();
   }
+
+  // Open and close subscription form for updating a new subscription
+
+  openUpdateSubscriptionForm(subscription: Subscription) {
+    this.editingSubscriptionId = subscription.id;
+
+    this.newSubscription = {
+      name: subscription.name,
+      description: subscription.description,
+      price: subscription.price,
+      currency: subscription.currency,
+      subscriptionType: subscription.subscriptionType,
+      billingDay: subscription.billingDay,
+      billingFrequency: subscription.billingFrequency,
+      createdDate: subscription.createdDate,          // mantém a original
+      nextPayment: subscription.nextPayment,
+      paymentMethod: subscription.paymentMethod,
+      status: subscription.status,
+      cardBank: subscription.cardBank ?? null,
+      cardFinalNumbers: subscription.cardFinalNumbers ?? ''
+    };
+
+    const forms = document.querySelector('.update-subscription-section') as HTMLElement;
+    const div = document.querySelector('.div_background_modal') as HTMLElement;
+    div.style.display = 'block';
+    forms.style.display = 'block';
+  }
+
+  closeUpdateSubscriptionForm() {
+    const forms = document.querySelector('.update-subscription-section') as HTMLElement;
+    const div = document.querySelector('.div_background_modal') as HTMLElement;
+    div.style.display = 'none';
+    forms.style.display = 'none';
+    this.isSubmitting = false;
+    this.editingSubscriptionId = null;
+    this.resetNewSubscription();
+  }
+
+  calculateNextPayment(createdDate: Date, billingDay: number, billingFrequency: string): Date {
+    // Cria uma cópia da data de criação para não modificar a original
+    const paymentDate = new Date(createdDate);
+
+    // Define o dia do mês para o dia de cobrança escolhido
+    paymentDate.setDate(billingDay);
+
+    // Se a data de pagamento calculada (neste mês) já passou ou é hoje,
+    // precisamos avançar para o próximo ciclo de cobrança.
+    if (paymentDate <= createdDate) {
+      // Avança para o próximo ciclo baseado na frequência
+      switch (billingFrequency) {
+        case 'MONTHLY':
+          paymentDate.setMonth(paymentDate.getMonth() + 1);
+          break;
+        case 'QUARTERLY':
+          paymentDate.setMonth(paymentDate.getMonth() + 3);
+          break;
+        case 'SEMESTRAL':
+          paymentDate.setMonth(paymentDate.getMonth() + 6);
+          break;
+        case 'ANNUAL':
+          paymentDate.setFullYear(paymentDate.getFullYear() + 1);
+          break;
+        default:
+          // Como padrão, avança um mês se a frequência for desconhecida
+          paymentDate.setMonth(paymentDate.getMonth() + 1);
+          break;
+      }
+    }
+    // Se a data de pagamento (paymentDate) for futura, não fazemos nada,
+    // pois ela já é a data correta da próxima cobrança.
+
+    return paymentDate;
+  }
+
+  // CRUD Functions -------------------------------------------
 
   listSubscriptions() {
     this.subscriptionsService.getAllSubscriptions().subscribe((data: any) => {
@@ -167,8 +256,8 @@ export class SubscriptionsComponent implements OnInit {
       cardFinalNumbers: this.newSubscription.cardFinalNumbers || null,
     }
 
-      this.isSubmitting = true;    // 👈 começa o loader
-      this.showSuccess = false; 
+    this.isSubmitting = true;    // 👈 começa o loader
+    this.showSuccess = false;
 
     this.subscriptionsService.addSubscription(newSubscription).subscribe({
       next: (response) => {
@@ -186,35 +275,88 @@ export class SubscriptionsComponent implements OnInit {
     });
   }
 
-  calculateNextPayment(createdDate: Date, billingDay: number, billingFrequency: string): Date {
-    const nextPayment = new Date(createdDate);
-
-    // Ajusta o dia do mês para o dia de cobrança
-    nextPayment.setDate(billingDay);
-
-    // Se o dia ajustado for anterior à data de criação, avança para o próximo mês
-    if (nextPayment < createdDate) {
-      nextPayment.setMonth(nextPayment.getMonth() + 1);
+  updateSubscription() {
+    if (!this.editingSubscriptionId) {
+      console.error('Nenhuma assinatura selecionada para edição.');
+      return;
     }
 
-    // Aplica a frequência de cobrança
-    switch (billingFrequency) {
-      case 'MONTHLY':
-        nextPayment.setMonth(nextPayment.getMonth() + 1);
-        break;
-      case 'QUARTERLY':
-        nextPayment.setMonth(nextPayment.getMonth() + 3);
-        break;
-      case 'SEMESTRAL':
-        nextPayment.setMonth(nextPayment.getMonth() + 6);
-        break;
-      case 'ANNUAL':
-        nextPayment.setFullYear(nextPayment.getFullYear() + 1);
-        break;
-      default:
-        throw new Error('Frequência de cobrança inválida');
+    const createdDate = new Date(this.newSubscription.createdDate);
+    const billingDay = this.newSubscription.billingDay;
+    const billingFrequency = this.newSubscription.billingFrequency;
+
+    if (billingDay === null) return;
+
+    const nextPayment = this.calculateNextPayment(createdDate, billingDay, billingFrequency);
+
+    const updatePayload = {
+      name: this.newSubscription.name,
+      description: '',
+      price: this.newSubscription.price,
+      currency: this.newSubscription.currency,
+      subscriptionType: this.newSubscription.subscriptionType,
+      billingDay: billingDay,
+      billingFrequency: billingFrequency,
+      nextPayment: nextPayment.toISOString(),
+      paymentMethod: this.newSubscription.paymentMethod,
+      status: this.newSubscription.status,
+      cardBank: this.newSubscription.cardBank || null,
+      cardFinalNumbers: this.newSubscription.cardFinalNumbers || null,
+    };
+
+    this.isSubmitting = true;
+
+    this.subscriptionsService
+      .updateSubscription(this.editingSubscriptionId, updatePayload)
+      .subscribe({
+        next: (updated) => {
+          // Atualiza a lista local
+          this.subscriptions = this.subscriptions.map(s =>
+            s.id === updated.id ? updated : s
+          );
+
+          this.listSubscriptions();
+          this.isSubmitting = false;
+          this.closeUpdateSubscriptionForm();
+          this.showUpdateSuccess = true;
+        },
+        error: (err) => {
+          console.error('Erro ao atualizar assinatura', err);
+          this.isSubmitting = false;
+        }
+      });
+  }
+
+
+  deleteSubscription(subscriptionId: string) {
+    if (!subscriptionId) {
+      console.error('ID da assinatura não fornecido para exclusão.');
+      return;
     }
 
-    return nextPayment;
+    const subscriptionToDelete = this.subscriptions.find(s => s.id === subscriptionId);
+    const subscriptionName = subscriptionToDelete ? subscriptionToDelete.name : 'esta assinatura';
+
+    const confirmed = confirm(`Deseja realmente excluir "${subscriptionName}"?`);
+    if (!confirmed) return;
+
+    this.isSubmitting = true; // Ativa o loader
+
+    this.subscriptionsService.deleteSubscription(subscriptionId).subscribe({
+      next: () => {
+        // Remove a assinatura da lista local para atualizar a UI
+        this.subscriptions = this.subscriptions.filter(
+          (s) => s.id !== subscriptionId
+        );
+        this.isSubmitting = false; // Para o loader
+        this.closeUpdateSubscriptionForm(); // Fecha o modal de EDIÇÃO
+        this.showDeleteSuccess = true; // Mostra o modal de exclusão com sucesso
+      },
+      error: (err) => {
+        console.error('Erro ao deletar assinatura', err);
+        this.isSubmitting = false; // Garante que o loader pare em caso de erro
+        alert('Ocorreu um erro ao apagar a assinatura.');
+      }
+    });
   }
 }

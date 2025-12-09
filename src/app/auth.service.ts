@@ -45,7 +45,6 @@ export class AuthService {
       const userCred = await signInWithCredential(auth, cred);
       const firebaseIdToken = await userCred.user.getIdToken();
 
-      this.setToken(firebaseIdToken);
       return { user: userCred.user, idToken: firebaseIdToken, googleIdToken };
     }
 
@@ -56,7 +55,6 @@ export class AuthService {
     const googleIdToken = cred?.idToken || undefined;
     const firebaseIdToken = await result.user.getIdToken();
 
-    this.setToken(firebaseIdToken);
     return { user: result.user, idToken: firebaseIdToken, googleIdToken };
   }
 

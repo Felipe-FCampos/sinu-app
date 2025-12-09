@@ -1,6 +1,7 @@
 <section class="subscriptions-section">
+  @if (subscriptions && subscriptions.length > 0) {
   @for (subscription of subscriptions; track subscription.id) {
-  <div class="subscriptionCard">
+  <div class="subscriptionCard" (click)="openUpdateSubscriptionForm(subscription)">
     <div class="subscription-header">
       <div class="subscription-name-status">
         <p class="status" [ngClass]="'status-' + subscription.status">
@@ -16,10 +17,12 @@
     </div>
 
     <div class="subscription-details">
+      @if (subscription.cardBank) {
       <div class="payment-info">
         <p>{{ subscription.cardBank }}</p>
         <p>Cartão de final: {{ subscription.cardFinalNumbers }}</p>
       </div>
+      }
       <p class="billing-date">Dia de Vencimento: {{ subscription.billingDay }}</p>
     </div>
 
@@ -31,11 +34,27 @@
     </div>
   </div>
   }
+  } @else {
+  <div class="no-subscriptions-message">
+    <span style="margin-bottom: 32px;">
+      <svg xmlns="http://www.w3.org/2000/svg" height="64px" viewBox="0 -960 960 960" width="64px" fill="#2c2c2c">
+        <path
+          d="M828.33-36.67 776-89q-10.67 4.33-21.5 6.67Q743.67-80 732.11-80H228q-45.83 0-77.92-32.08Q118-144.17 118-190v-123.33h124.67v-309L26.33-838.67 74-886.33l802 802-47.67 47.66Zm-601-110h491l-100-100H184.67V-190q0 18.42 12.5 30.88 12.5 12.45 30.16 12.45ZM842-213l-66.67-66.67v-493.66H281.67l-39-39V-880l59.86 60 59.87-60 59.87 60 59.86-60L542-820l60-60 60 60 60-60 60 60 60-60v667ZM309.33-313.33h242.34L309.33-555.67v242.34ZM441-614.67l-66.67-66.66H598v66.66H441Zm129.33 129.34L503.67-552H598v66.67h-27.67Zm116.22-3.34q-14.22 0-23.72-9.61-9.5-9.62-9.5-23.84 0-14.21 9.62-23.71t23.83-9.5q14.22 0 23.72 9.61 9.5 9.62 9.5 23.84 0 14.21-9.62 23.71-9.61 9.5-23.83 9.5Zm.12-126q-13.67 0-23.5-9.83-9.84-9.83-9.84-23.5t9.84-23.5q9.83-9.83 23.5-9.83 13.66 0 23.5 9.83Q720-661.67 720-648t-9.83 23.5q-9.84 9.83-23.5 9.83Zm-502 468v-100 100Z" />
+      </svg>
+    </span>
+    <p>Você ainda não possui assinaturas.</p>
+    <p>Clique no botão '+' para adicionar a sua primeira!</p>
+  </div>
+  }
   <button class="add-subscription-button" (click)="openAddSubscriptionForm()">+</button>
   <section style="display: none;" class="add-subscription-section">
     <div class="add-subscription-header">
       <h2>Adicionar Nova Assinatura</h2>
-      <button class="close-button" (click)="closeAddSubscriptionForm()">X</button>
+      <button class="close-button" (click)="closeAddSubscriptionForm()">
+        <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#2c2c2c">
+          <path d="m256-200-56-56 224-224-224-224 56-56 224 224 224-224 56 56-224 224 224 224-56 56-224-224-224 224Z" />
+        </svg>
+      </button>
     </div>
 
     <form (ngSubmit)="addSubscription()">
@@ -46,8 +65,9 @@
 
       <div class="price-currency-container">
         <div class="price-currency-group">
-          <label for="price">Preço (em centavos):</label>
-          <input id="price" type="number" [(ngModel)]="newSubscription.price" name="price" required />
+          <label for="price">Preço:</label>
+          <input id="price" type="text" inputmode="decimal" [(ngModel)]="newSubscription.price" name="price"
+            appCurrencyMask required />
         </div>
 
         <div class="price-currency-group">
@@ -85,7 +105,9 @@
       <div class="billing-day-container">
         <label for="billingDay">Dia de Cobrança:</label>
         <select id="billingDay" [(ngModel)]="newSubscription.billingDay" name="billingDay" required>
-          <option *ngFor="let day of days" [value]="day">{{ day }}</option>
+          @for (day of days; track day) {
+          <option [value]="day">{{ day }}</option>
+          }
         </select>
       </div>
 
@@ -109,6 +131,8 @@
             <option value="Itaú">Itaú</option>
             <option value="Bradesco">Bradesco</option>
             <option value="Santander">Santander</option>
+            <option value="Banco Inter">Banco Inter</option>
+            <option value="PicPay">PicPay</option>
             <option value="Nubank">Nubank</option>
           </select>
         </div>
@@ -123,17 +147,159 @@
         {{ isSubmitting ? 'Adicionando...' : 'Adicionar Assinatura' }}
       </button>
     </form>
-    <div class="loader-overlay" *ngIf="isSubmitting">
+    @if (isSubmitting) {
+    <div class="loader-overlay">
       <div class="spinner"></div>
     </div>
+    }
+  </section>
+  <div style="display: none;" class="div_background_modal"></div>
+
+
+  <!-- Update subscription form -->
+  <section style="display: none;" class="update-subscription-section">
+    <div class="update-subscription-header">
+      <h2>Editar Assinatura</h2>
+      <button class="close-button" (click)="closeUpdateSubscriptionForm()">
+        <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#2c2c2c">
+          <path d="m256-200-56-56 224-224-224-224 56-56 224 224 224-224 56 56-224 224 224 224-56 56-224-224-224 224Z" />
+        </svg>
+      </button>
+    </div>
+
+    <form (ngSubmit)="updateSubscription()">
+      <div class="name-container">
+        <label for="name">Nome:</label>
+        <input id="name" [(ngModel)]="newSubscription.name" name="name" required />
+      </div>
+
+      <div class="price-currency-container">
+        <div class="price-currency-group">
+          <label for="price">Preço:</label>
+          <input id="price" type="text" inputmode="decimal" [(ngModel)]="newSubscription.price" name="price"
+            appCurrencyMask required />
+        </div>
+
+        <div class="price-currency-group">
+          <label for="currency">Moeda:</label>
+          <select id="currency" [(ngModel)]="newSubscription.currency" name="currency" required>
+            <option value="BRL">Real (BRL)</option>
+            <option value="USD">Dólar (USD)</option>
+            <option value="EUR">Euro (EUR)</option>
+            <option value="GBP">Libra (GBP)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="subscription-type-container">
+        <label for="subscriptionType">Tipo de Assinatura:</label>
+        <select id="subscriptionType" [(ngModel)]="newSubscription.subscriptionType" name="subscriptionType" required>
+          <option value="STREAMING">Streaming</option>
+          <option value="SOFTWARE">Software</option>
+          <option value="GAMING">Gaming</option>
+        </select>
+      </div>
+
+      <hr />
+
+      <div class="billingFrequency-container">
+        <label for="billingFrequency">Frequência de Cobrança:</label>
+        <select id="billingFrequency" [(ngModel)]="newSubscription.billingFrequency" name="billingFrequency" required>
+          <option value="MONTHLY">Mensal</option>
+          <option value="QUARTERLY">Trimestral</option>
+          <option value="SEMESTRAL">Semestral</option>
+          <option value="ANNUAL">Anual</option>
+        </select>
+      </div>
+
+      <div class="billing-day-container">
+        <label for="billingDay">Dia de Cobrança:</label>
+        <select id="billingDay" [(ngModel)]="newSubscription.billingDay" name="billingDay" required>
+          @for (day of days; track day) {
+          <option [value]="day">{{ day }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="payment-method-container">
+        <label for="paymentMethod">Forma de Pagamento:</label>
+        <select id="paymentMethod" [(ngModel)]="newSubscription.paymentMethod" name="paymentMethod" required>
+          <option value="CREDIT_CARD">Cartão de Crédito</option>
+          <option value="DEBIT_CARD">Cartão de Débito</option>
+          <option value="PIX">Pix</option>
+          <option value="BOLETO">Boleto</option>
+          <option value="BANK_TRANSFER">Transferência Bancária</option>
+        </select>
+      </div>
+
+      <div class="card-info-container">
+        <div class="card-bank-container">
+          <label for="cardBank">Banco:</label>
+          <select id="cardBank" [(ngModel)]="newSubscription.cardBank" name="cardBank" required>
+            <option value="Banco do Brasil">Banco do Brasil</option>
+            <option value="Caixa Econômica">Caixa Econômica</option>
+            <option value="Itaú">Itaú</option>
+            <option value="Bradesco">Bradesco</option>
+            <option value="Santander">Santander</option>
+            <option value="Banco Inter">Banco Inter</option>
+            <option value="PicPay">PicPay</option>
+            <option value="Nubank">Nubank</option>
+          </select>
+        </div>
+
+        <div class="card-last-numbers-container">
+          <label for="cardLastNumbers">Últimos Números do Cartão:</label>
+          <input id="cardLastNumbers" [(ngModel)]="newSubscription.cardFinalNumbers" name="cardLastNumbers" required />
+        </div>
+      </div>
+
+      <div style="display: flex; justify-content: space-between; gap: 8px;">
+        <button type="submit" style="margin: 0 !important;" [disabled]="isSubmitting">
+          {{ isSubmitting ? 'Salvando...' : 'Salvar' }}
+        </button>
+        <button type="button" (click)="deleteSubscription(editingSubscriptionId!)" [disabled]="isSubmitting || !editingSubscriptionId"
+          class="delete-button">
+          {{ isSubmitting ? 'Apagando...' : 'Apagar' }}
+        </button>
+      </div>
+    </form>
+    @if (isSubmitting) {
+    <div class="loader-overlay">
+      <div class="spinner"></div>
+    </div>
+    }
   </section>
   <div style="display: none;" class="div_background_modal"></div>
 </section>
 
-<div class="success-modal" *ngIf="showSuccess">
+@if (showSuccess) {
+<div class="success-modal">
   <div class="success-modal-backdrop"></div>
   <div class="success-modal-content">
     <p>Assinatura adicionada com sucesso!</p>
     <button (click)="showSuccess = false">OK</button>
   </div>
 </div>
+}
+
+<!-- Modal de Sucesso para Alteração -->
+@if (showUpdateSuccess) {
+<div class="success-modal">
+  <div class="success-modal-backdrop"></div>
+  <div class="success-modal-content">
+    <p>Assinatura alterada com sucesso!</p>
+    <button (click)="showUpdateSuccess = false">OK</button>
+  </div>
+</div>
+}
+
+<!-- Modal de Sucesso para Exclusão -->
+@if (showDeleteSuccess) {
+<div class="success-modal">
+  <div class="success-modal-backdrop"></div>
+  <div class="success-modal-content">
+    <p>Assinatura apagada com sucesso!</p>
+    <button (click)="showDeleteSuccess = false">OK</button>
+  </div>
+</div>
+}
