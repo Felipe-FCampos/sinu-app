@@ -71,7 +71,6 @@ export class LoginComponent implements OnInit {
   async googleLogin() {
     try {
     const { googleIdToken } = await this.authService.signInWithGoogle();
-    console.log('Token enviado: ', googleIdToken);
     const response = await fetch(`${this.apiUrl}/auth/google`, {                             
        method: 'POST',
        headers: {
@@ -85,7 +84,6 @@ export class LoginComponent implements OnInit {
 
     if (response.ok) {
       const data = await response.json();
-      console.log('token retornado: ', data.idToken);
       this.authService.setToken(data.idToken);
       if (Capacitor.isNativePlatform() && data.refreshToken) {  
           await this.secureStore.setRefresh(data.refreshToken);
