@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, map } from 'rxjs'; // 👈 Importe o 'map'
 import { Capacitor } from '@capacitor/core';
 import { FirebaseAuthentication } from '@capacitor-firebase/authentication';
 import { getAuth, GoogleAuthProvider, signInWithCredential, signInWithPopup, User } from 'firebase/auth';
@@ -18,6 +18,11 @@ export interface LoginResponse {
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private token$ = new BehaviorSubject<string | null>(null);
+
+  // 👇 Crie este observable público
+  public isAuthenticated$ = this.token$.pipe(
+    map(token => !!token) // Transforma o token (string) ou null em um booleano (true/false)
+  );
 
   get token(): string | null {
     return this.token$.value;
