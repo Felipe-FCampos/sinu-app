@@ -13,7 +13,7 @@ registerLocaleData(localeDe, 'de-DE');
 export enum SubscriptionStatus {
   Disabled = 0,
   Active = 1,
-  Pending = 2,
+  Expiring = 2,
   Expired = 3,
 }
 
@@ -118,7 +118,7 @@ export class SubscriptionsComponent implements OnInit {
   getStatusLabel(status: SubscriptionStatus): string {
     switch (status) {
       case SubscriptionStatus.Active: return 'Ativo';
-      case SubscriptionStatus.Pending: return 'Pendente';
+      case SubscriptionStatus.Expiring: return 'À vencer';
       case SubscriptionStatus.Expired: return 'Vencido';
       case SubscriptionStatus.Disabled: return 'Desativado';
       default: return 'Desconhecido';
