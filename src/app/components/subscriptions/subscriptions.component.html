@@ -26,12 +26,18 @@
       <p class="billing-date">Dia de Vencimento: {{ subscription.billingDay }}</p>
     </div>
 
+    @if (subscription.status === 3) {
+    <div class="subscription-footer-payment" (click)="paySubscription(subscription); $event.stopPropagation()">
+      Pagar cobrança
+    </div>
+    } @else {
     <div class="subscription-footer">
       <p class="next-date">Próxima cobrança:</p>
       <p class="next-date">
         {{ subscription.nextPayment | date:'dd/MM' }}
       </p>
     </div>
+    }
   </div>
   }
   } @else {
@@ -257,8 +263,8 @@
         <button type="submit" style="margin: 0 !important;" [disabled]="isSubmitting">
           {{ isSubmitting ? 'Salvando...' : 'Salvar' }}
         </button>
-        <button type="button" (click)="deleteSubscription(editingSubscriptionId!)" [disabled]="isSubmitting || !editingSubscriptionId"
-          class="delete-button">
+        <button type="button" (click)="deleteSubscription(editingSubscriptionId!)"
+          [disabled]="isSubmitting || !editingSubscriptionId" class="delete-button">
           {{ isSubmitting ? 'Apagando...' : 'Apagar' }}
         </button>
       </div>
@@ -300,6 +306,17 @@
   <div class="success-modal-content">
     <p>Assinatura apagada com sucesso!</p>
     <button (click)="showDeleteSuccess = false">OK</button>
+  </div>
+</div>
+}
+
+<!-- Modal de Sucesso para Pagamento -->
+@if (showPaymentSuccess) {
+<div class="success-modal">
+  <div class="success-modal-backdrop"></div>
+  <div class="success-modal-content">
+    <p>Pagamento realizado com sucesso!</p>
+    <button (click)="showPaymentSuccess = false">OK</button>
   </div>
 </div>
 }

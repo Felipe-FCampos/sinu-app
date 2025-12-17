@@ -70,8 +70,20 @@
     align-items: center;
     border: #d6d6d6 1px solid;
     border-radius: 8px;
-    padding-inline: 16px;
+    padding: 16px;
     background-color: #fff;
+}
+
+.subscription-footer-payment {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border: #d6d6d6 1px solid;
+    border-radius: 8px;
+    padding: 16px;
+    background-color: #5c9743;
+    color: #fff;
+    font-weight: 600;
 }
 
 .next-date {

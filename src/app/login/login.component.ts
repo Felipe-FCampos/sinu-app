@@ -93,9 +93,11 @@ export class LoginComponent implements OnInit {
     } else {
       const error = await response.json();
       console.error('Erro no login:', error);
+      alert(error.message)
     }
   } catch (error) {
     console.error('Erro no login com Google:', error);
+    alert('Não foi possível obter a conexão com a API' + error)
   }
 }
 }

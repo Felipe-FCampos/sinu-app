@@ -41,6 +41,7 @@ export interface UpdateSubscriptionPayload {
 })
 export class SubscriptionsService {
   apiUrl = environment.apiUrl;
+  apiUrlDev = environment.apiUrlDev;
 
   constructor(
     private authService: AuthService,
@@ -79,5 +80,13 @@ export class SubscriptionsService {
         headers: { Authorization: `Bearer ${this.authService.token}` }
       }
     );
+  }
+
+  paySubscription(subscription: Subscription) {
+    return this.http.post(`${this.apiUrl}/subscription/confirm-payment/${subscription.id}`, subscription, {
+      headers: {
+        'Authorization': `Bearer ${this.authService.token}`
+      }
+    });
   }
 }

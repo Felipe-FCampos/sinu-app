@@ -57,6 +57,7 @@ export class SubscriptionsComponent implements OnInit {
   showSuccess = false;    // 👈 modal de sucesso para ADIÇÃO
   showUpdateSuccess = false; // 👈 modal de sucesso para ATUALIZAÇÃO
   showDeleteSuccess = false; // 👈 modal de sucesso para EXCLUSÃO
+  showPaymentSuccess = false; // 👈 modal para pagamento
 
   days: number[] = Array.from({ length: 30 }, (_, i) => i + 1); // Gera os dias de 1 a 30
 
@@ -356,6 +357,19 @@ export class SubscriptionsComponent implements OnInit {
         console.error('Erro ao deletar assinatura', err);
         this.isSubmitting = false; // Garante que o loader pare em caso de erro
         alert('Ocorreu um erro ao apagar a assinatura.');
+      }
+    });
+  }
+
+  paySubscription(subscription: Subscription) {
+    this.subscriptionsService.paySubscription(subscription).subscribe({
+      next: (response) => {
+        this.showPaymentSuccess = true; // Mostra o modal de sucesso
+        this.listSubscriptions(); // Refresh the list after payment
+      },
+      error: (err) => {
+        // Mantive o alert para o erro, mas você pode criar um modal de erro também
+        alert(`Erro ao processar o pagamento: ${err.message || 'Tente novamente.'}`);
       }
     });
   }
