@@ -1,1 +1,33 @@
-<p>dashboard works!</p>
+<div class="dashboard-container">
+    <div class="summary-cost-card">
+        <p class="summary-cost-title">Total gasto por mês:</p>
+        @for (cost of totalCostsByCurrency | keyvalue; track cost.key) {
+        <p class="summary-cost-item">
+            ({{ cost.key }}):
+            <strong>
+                {{ cost.value | currency:cost.key:'symbol':'1.2-2':getLocaleByCurrency(cost.key) }}
+            </strong>
+        </p>
+        }
+    </div>
+
+    <div class="summary-subscriptions-card">
+        <p class="summary-subscriptions-title">Total de itens: <strong>{{ totalSubscriptionsCount }}</strong></p>
+        <div class="summary-subscriptions-item summary-active">
+            <p>Ativos:</p>
+            <strong>{{ activeSubscriptionsCount }}</strong>
+        </div>
+        <div class="summary-subscriptions-item summary-due">
+            <p>À vencer:</p>
+            <strong>{{ dueSubscriptionsCount }}</strong>
+        </div>
+        <div class="summary-subscriptions-item summary-expired">
+            <p>Vencidos:</p>
+            <strong>{{ expiredSubscriptionsCount }}</strong>
+        </div>
+        <div class="summary-subscriptions-item summary-disabled">
+            <p>Desativados:</p>
+            <strong>{{ disabledSubscriptionsCount }}</strong>
+        </div>
+    </div>
+</div>

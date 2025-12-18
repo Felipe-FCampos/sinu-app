@@ -36,11 +36,11 @@ export interface Subscription {
 
 @Component({
   selector: 'app-subscriptions',
-  standalone: true, // Assumindo que seu componente é standalone
+  standalone: true,
   imports: [
     CommonModule,
     FormsModule,
-    CurrencyMaskDirective // 2. Adicione a diretiva aqui
+    CurrencyMaskDirective
   ],
   templateUrl: './subscriptions.component.html',
   styleUrls: ['./subscriptions.component.scss']

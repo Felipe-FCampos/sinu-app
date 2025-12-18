@@ -1,10 +1,17 @@
 <section class="home-page">
   <p class="app-name">Sinu v1.0</p>
-  @if (user) {
-    <p class="welcome-message">Bem vindo, {{ user.name }}!</p>
-  }
 
-  <div class="subscriptions-section">
-    <app-subscriptions></app-subscriptions>
-  </div>
+  @if (isLoading) {
+    <div class="loader-container">
+      <div class="loader"></div>
+    </div>
+  } @else {
+    @if (user) {
+      <p class="welcome-message">Bem-vindo, {{ user.name }}!</p>
+    }
+  
+    <div class="subscriptions-section">
+      <app-dashboard></app-dashboard>
+    </div>
+  }
 </section>

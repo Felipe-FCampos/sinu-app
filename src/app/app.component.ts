@@ -18,6 +18,7 @@ import { AsyncPipe } from '@angular/common';
 export class AppComponent implements OnInit {
 
   apiUrl = environment.apiUrl;
+  isLoading: boolean = true; // Adiciona o estado de carregamento
 
   constructor(
     private router: Router,
@@ -30,9 +31,11 @@ export class AppComponent implements OnInit {
       .subscribe({
         next: r => {
           this.auth.setToken(r.idToken);
+          this.isLoading = false; // Esconde o loader em caso de sucesso
         },
         error: () => {
           this.auth.setToken(null);
+          this.isLoading = false; // Esconde o loader em caso de erro
 
           if (!this.router.url.includes('/login')) {
             this.redirectToLogin();
