@@ -1,0 +1,16 @@
+.profile-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+.logout-button {
+    padding: 8px 16px;
+    border-radius: 6px;
+    border: none;
+    background: #111;
+    color: #fff;
+    font-weight: 600;
+    cursor: pointer;
+}

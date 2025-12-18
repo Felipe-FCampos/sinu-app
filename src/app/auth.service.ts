@@ -1,8 +1,11 @@
-import { Injectable } from '@angular/core';
-import { BehaviorSubject, map } from 'rxjs'; // 👈 Importe o 'map'
+import { Injectable, inject } from '@angular/core';
+import { BehaviorSubject, firstValueFrom, map } from 'rxjs';
 import { Capacitor } from '@capacitor/core';
 import { FirebaseAuthentication } from '@capacitor-firebase/authentication';
 import { getAuth, GoogleAuthProvider, signInWithCredential, signInWithPopup, User } from 'firebase/auth';
+import { HttpClient } from '@angular/common/http';
+import { environment } from 'src/environments/environment';
+import { SecureTokenStore } from './secure-token.store';
 
 export interface LoginPayload {
   email: string;
@@ -18,6 +21,9 @@ export interface LoginResponse {
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private token$ = new BehaviorSubject<string | null>(null);
+  private http = inject(HttpClient);
+  private secureStore = inject(SecureTokenStore); 
+  private apiUrl = environment.apiUrl;
 
   get token(): string | null {
     return this.token$.value;
@@ -59,11 +65,19 @@ export class AuthService {
   }
 
   async signOut(): Promise<void> {
+    try {
+      await firstValueFrom(this.http.post(`${this.apiUrl}/auth/logout`, {}, { withCredentials: true }));
+    } catch (error) {
+      console.error('Falha ao fazer logout no backend, continuando com o logout local...', error);
+    }
+    
     const auth = getAuth();
     if (Capacitor.isNativePlatform()) {
       await FirebaseAuthentication.signOut();
+      await this.secureStore.clear();
     }
     await auth.signOut();
+
     this.setToken(null);
   }
 }

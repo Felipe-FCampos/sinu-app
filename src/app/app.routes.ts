@@ -4,6 +4,7 @@ import { authGuard } from './auth.guard';
 import { HomeComponent } from './pages/home/home.component';
 import { RegisterComponent } from './register/register.component';
 import { SubsComponent } from './pages/subs/subs.component';
+import { ProfileComponent } from './pages/profile/profile.component';
 
 export const routes: Routes = [
     {
@@ -19,7 +20,8 @@ export const routes: Routes = [
         canActivateChild: [authGuard],
         children: [
             { path: '', component: HomeComponent },
-            { path: 'subscriptions', component: SubsComponent }
+            { path: 'subscriptions', component: SubsComponent },
+            { path: 'profile', component: ProfileComponent },
         ],
     }
 ];
