@@ -14,5 +14,6 @@ export class ProfileComponent {
 
   async logout() {
     await this.auth.signOut();
+    this.router.navigate(['/login']);
   }
 }
