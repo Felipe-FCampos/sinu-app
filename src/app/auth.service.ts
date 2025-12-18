@@ -19,11 +19,6 @@ export interface LoginResponse {
 export class AuthService {
   private token$ = new BehaviorSubject<string | null>(null);
 
-  // 👇 Crie este observable público
-  public isAuthenticated$ = this.token$.pipe(
-    map(token => !!token) // Transforma o token (string) ou null em um booleano (true/false)
-  );
-
   get token(): string | null {
     return this.token$.value;
   }

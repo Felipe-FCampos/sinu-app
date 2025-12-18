@@ -11,7 +11,7 @@ import { AsyncPipe } from '@angular/common';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, MenuComponent, AsyncPipe],
+  imports: [RouterOutlet, MenuComponent],
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss']
 })
