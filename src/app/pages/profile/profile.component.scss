@@ -1,15 +1,69 @@
 .profile-container {
     display: flex;
+    width: 100%;
+    height: 100vh;
+    padding: 114px 0 0 0;
+
+    .profile-card {
+        background-color: #e3e3e3;
+        border-radius: 16px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 16px;
+        width: 100%;
+
+        .user-info {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 48px;
+
+            .account-created-at {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                font-size: 14px;
+                color: #555555;
+            }
+        }
+    }
+}
+
+.user-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 8px;
+    margin: -48px 0 12px 0;
+    padding: 0 0 24px 0;
+    border-bottom: 1px solid rgb(130, 130, 130);
+
+    & svg {
+        background-color: #e3e3e3;
+        border-radius: 50%;
+        width: 110px;
+        height: 110px;
+    }
+}
+
+.profile-actions {
+    display: flex;
     justify-content: center;
     align-items: center;
-    height: 100vh;
+    flex-direction: column;
+    gap: 12px;
+    width: 100%;
+    margin-bottom: 24px;
+    padding-inline: 24px;
 }
 
 .logout-button {
     padding: 8px 16px;
     border-radius: 6px;
     border: none;
-    background: #111;
+    background: #be4040;
     color: #fff;
     font-weight: 600;
     cursor: pointer;

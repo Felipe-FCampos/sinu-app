@@ -24,3 +24,27 @@
 .app-container {
     background-color: #fff;
 }
+
+.home-page {
+    padding: 10px 0 0 0;
+}
+
+.app-name {
+    font-size: 14px;
+    text-align: center;
+    font-style: italic;
+    font-weight: 700;
+    color: #2c2c2c;
+    margin-block: 10px;
+    padding-block: 10px;
+    margin-inline: 20px;
+    border-bottom: #2c2c2c 1px solid;
+}
+
+.welcome-message {
+    font-size: 20px;
+    font-weight: 600;
+    color: #2c2c2c;
+    margin-bottom: 20px;
+    margin-inline: 20px;
+}

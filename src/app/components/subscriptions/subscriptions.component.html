@@ -88,11 +88,12 @@
       </div>
 
       <div class="subscription-type-container">
-        <label for="subscriptionType">Tipo de Assinatura:</label>
+        <label for="subscriptionType">Tipo de gasto:</label>
         <select id="subscriptionType" [(ngModel)]="newSubscription.subscriptionType" name="subscriptionType" required>
-          <option value="STREAMING">Streaming</option>
-          <option value="SOFTWARE">Software</option>
-          <option value="GAMING">Gaming</option>
+          <!-- SUBSTITUA AS OPÇÕES ESTÁTICAS POR ESTE BLOCO @for -->
+          @for (type of subscriptionTypes; track type.value) {
+            <option [value]="type.value">{{ type.label }}</option>
+          }
         </select>
       </div>
 
@@ -128,30 +129,35 @@
         </select>
       </div>
 
-      <div class="card-info-container">
-        <div class="card-bank-container">
-          <label for="cardBank">Banco:</label>
-          <select id="cardBank" [(ngModel)]="newSubscription.cardBank" name="cardBank" required>
-            <option value="Banco do Brasil">Banco do Brasil</option>
-            <option value="Caixa Econômica">Caixa Econômica</option>
-            <option value="Itaú">Itaú</option>
-            <option value="Bradesco">Bradesco</option>
-            <option value="Santander">Santander</option>
-            <option value="Banco Inter">Banco Inter</option>
-            <option value="PicPay">PicPay</option>
-            <option value="Nubank">Nubank</option>
-          </select>
+      <!-- Adicione a mesma condição @if aqui -->
+      @if (newSubscription.paymentMethod === 'CREDIT_CARD' || newSubscription.paymentMethod === 'DEBIT_CARD') {
+        <div class="card-info-container">
+          <div class="card-bank-container">
+            <label for="cardBank">Banco:</label>
+            <select id="cardBank" [(ngModel)]="newSubscription.cardBank" name="cardBank">
+              <option value="Banco do Brasil">Banco do Brasil</option>
+              <option value="Caixa Econômica">Caixa Econômica</option>
+              <option value="Itaú">Itaú</option>
+              <option value="Bradesco">Bradesco</option>
+              <option value="Santander">Santander</option>
+              <option value="Banco Inter">Banco Inter</option>
+              <option value="PicPay">PicPay</option>
+              <option value="Nubank">Nubank</option>
+            </select>
+          </div>
+  
+          <div class="card-last-numbers-container">
+            <label for="cardLastNumbers">Últimos Números do Cartão:</label>
+            <input id="cardLastNumbers" [(ngModel)]="newSubscription.cardFinalNumbers" name="cardLastNumbers" />
+          </div>
         </div>
+      }
 
-        <div class="card-last-numbers-container">
-          <label for="cardLastNumbers">Últimos Números do Cartão:</label>
-          <input id="cardLastNumbers" [(ngModel)]="newSubscription.cardFinalNumbers" name="cardLastNumbers" required />
-        </div>
+      <div style="display: flex; justify-content: space-between; gap: 8px;">
+        <button type="submit" [disabled]="isSubmitting">
+          {{ isSubmitting ? 'Adicionando...' : 'Adicionar Assinatura' }}
+        </button>
       </div>
-
-      <button type="submit" [disabled]="isSubmitting">
-        {{ isSubmitting ? 'Adicionando...' : 'Adicionar Assinatura' }}
-      </button>
     </form>
     @if (isSubmitting) {
     <div class="loader-overlay">
@@ -198,11 +204,12 @@
       </div>
 
       <div class="subscription-type-container">
-        <label for="subscriptionType">Tipo de Assinatura:</label>
+        <label for="subscriptionType">Tipo de gasto:</label>
         <select id="subscriptionType" [(ngModel)]="newSubscription.subscriptionType" name="subscriptionType" required>
-          <option value="STREAMING">Streaming</option>
-          <option value="SOFTWARE">Software</option>
-          <option value="GAMING">Gaming</option>
+          <!-- SUBSTITUA AS OPÇÕES ESTÁTICAS POR ESTE BLOCO @for -->
+          @for (type of subscriptionTypes; track type.value) {
+            <option [value]="type.value">{{ type.label }}</option>
+          }
         </select>
       </div>
 
@@ -238,6 +245,7 @@
         </select>
       </div>
 
+      @if (newSubscription.paymentMethod === 'CREDIT_CARD' || newSubscription.paymentMethod === 'DEBIT_CARD') {
       <div class="card-info-container">
         <div class="card-bank-container">
           <label for="cardBank">Banco:</label>
@@ -258,6 +266,7 @@
           <input id="cardLastNumbers" [(ngModel)]="newSubscription.cardFinalNumbers" name="cardLastNumbers" required />
         </div>
       </div>
+      }
 
       <div style="display: flex; justify-content: space-between; gap: 8px;">
         <button type="submit" style="margin: 0 !important;" [disabled]="isSubmitting">

@@ -53,6 +53,20 @@ export class SubscriptionsComponent implements OnInit {
 
   subscriptions: Subscription[] = [];
 
+  // ADICIONE ESTA PROPRIEDADE
+  public subscriptionTypes = [
+    { value: 'STREAMING', label: 'Streaming' },
+    { value: 'SOFTWARE', label: 'Software' },
+    { value: 'GAMING', label: 'Jogos' },
+    { value: 'RENT', label: 'Aluguel' },
+    { value: 'BILL', label: 'Contas e Utilitários' },
+    { value: 'MUSIC', label: 'Música' },
+    { value: 'NEWS', label: 'Notícias e Revistas' },
+    { value: 'EDUCATION', label: 'Educação' },
+    { value: 'FITNESS', label: 'Fitness e Saúde' },
+    { value: 'OTHER', label: 'Outros' }
+  ];
+
   isSubmitting = false;   // 👈 loader
   showSuccess = false;    // 👈 modal de sucesso para ADIÇÃO
   showUpdateSuccess = false; // 👈 modal de sucesso para ATUALIZAÇÃO

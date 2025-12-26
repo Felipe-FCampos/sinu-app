@@ -8,6 +8,7 @@ import { environment } from 'src/environments/environment';
 import { MenuComponent } from "./components/menu/menu.component"
 
 import { AsyncPipe } from '@angular/common';
+import { UserData } from './user.service';
 
 @Component({
   selector: 'app-root',
@@ -19,6 +20,7 @@ export class AppComponent implements OnInit {
 
   apiUrl = environment.apiUrl;
   isLoading: boolean = true; // Adiciona o estado de carregamento
+  user: UserData | null = null;
 
   constructor(
     private router: Router,
