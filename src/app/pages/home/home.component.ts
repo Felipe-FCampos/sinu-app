@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 
-import { UserService } from '../../user.service';
-import { UserData } from '../../user.service';
+import { UserService } from '../../services/user.service';
+import { UserData } from '../../services/user.service';
 
 import { DashboardComponent } from 'src/app/components/dashboard/dashboard.component';
 

@@ -5,7 +5,7 @@ import { FirebaseAuthentication } from '@capacitor-firebase/authentication';
 import { getAuth, GoogleAuthProvider, signInWithCredential, signInWithPopup, User } from 'firebase/auth';
 import { HttpClient } from '@angular/common/http';
 import { environment } from 'src/environments/environment';
-import { SecureTokenStore } from './secure-token.store';
+import { SecureTokenStore } from '../secure-token.store';
 
 export interface LoginPayload {
   email: string;

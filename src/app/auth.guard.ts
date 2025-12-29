@@ -3,7 +3,7 @@ import { inject } from '@angular/core';
 import { CanActivateFn, Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
-import { AuthService } from './auth.service';
+import { AuthService } from './services/auth.service';
 import { environment } from 'src/environments/environment';
 import { Capacitor } from '@capacitor/core';                 
 import { SecureTokenStore } from './secure-token.store';  

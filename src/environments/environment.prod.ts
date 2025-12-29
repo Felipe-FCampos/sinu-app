@@ -10,5 +10,5 @@ export const environment = {
       measurementId: "G-CWXNY5Q9BS"
     },
     apiUrl: 'https://sinu-api.onrender.com',
-    apiUrlDev: 'http://192.168.0.138:8000'
+    apiUrlDev: 'http://0.0.0.0:8000'
 };

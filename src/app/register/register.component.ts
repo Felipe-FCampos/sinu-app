@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 
 import { environment } from 'src/environments/environment';
-import { AuthService } from '../auth.service';
+import { AuthService } from '../services/auth.service';
 import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute, RouterLink } from '@angular/router';
 import { Capacitor } from '@capacitor/core';

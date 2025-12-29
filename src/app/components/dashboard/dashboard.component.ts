@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Subscription, SubscriptionStatus } from '../subscriptions/subscriptions.component';
-import { SubscriptionsService } from 'src/app/subscriptions.service';
+import { SubscriptionsService } from 'src/app/services/subscriptions.service';
 import { DatePipe, CurrencyPipe, KeyValuePipe } from '@angular/common';
 import localePt from '@angular/common/locales/pt';
 import localeDe from '@angular/common/locales/de';

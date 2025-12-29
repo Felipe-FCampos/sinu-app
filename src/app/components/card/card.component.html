@@ -1,0 +1,20 @@
+<section class="cards-container">
+  @if (cards.length > 0) {
+    @for (card of cards; track card.id) {
+      <div class="card-item">
+        <div class="card-header">
+          <h3>{{ card.cardName }}</h3>
+          <span>Final {{ card.cardFinalNumbers }}</span>
+        </div>
+        <div class="card-body">
+          <p>Banco: {{ card.cardbank }}</p>
+          <p>Limite: {{ card.limit | currency:'BRL' }}</p>
+          <p>Gasto Total: {{ card.totalSpent | currency:'BRL' }}</p>
+          <p>Vencimento: Dia {{ card.dueDate }}</p>
+        </div>
+      </div>
+    }
+  } @else {
+    <p>Nenhum cartão encontrado.</p>
+  }
+</section>

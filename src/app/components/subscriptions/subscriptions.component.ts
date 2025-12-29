@@ -3,7 +3,7 @@ import { CommonModule, registerLocaleData, } from '@angular/common';
 import { Timestamp } from '@angular/fire/firestore';
 import localePt from '@angular/common/locales/pt';
 import localeDe from '@angular/common/locales/de'; // Exemplo se você mapear 'EUR' para 'de-DE'
-import { CreateSubscriptionPayload, SubscriptionsService } from 'src/app/subscriptions.service';
+import { CreateSubscriptionPayload, SubscriptionsService } from 'src/app/services/subscriptions.service';
 import { FormsModule } from '@angular/forms';
 import { CurrencyMaskDirective } from '../../currency-mask.directive'; // 1. Importe a diretiva
 

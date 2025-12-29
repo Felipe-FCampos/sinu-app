@@ -3,12 +3,12 @@ import { Component, OnInit } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
-import { AuthService } from './auth.service';
+import { AuthService } from './services/auth.service';
 import { environment } from 'src/environments/environment';
 import { MenuComponent } from "./components/menu/menu.component"
 
 import { AsyncPipe } from '@angular/common';
-import { UserData } from './user.service';
+import { UserData } from './services/user.service';
 
 @Component({
   selector: 'app-root',
