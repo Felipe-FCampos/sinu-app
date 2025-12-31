@@ -30,7 +30,7 @@ export class CardsService {
    // 2. Defina o tipo de retorno da função como Observable<Card[]>
    getAllCards(): Observable<Card[]> {
     // 3. Adicione o tipo <Card[]> ao método http.get
-    return this.http.get<Card[]>(`${this.apiUrlDev}/cards/list`, {
+    return this.http.get<Card[]>(`${this.apiUrl}/cards/list`, {
       headers: {
         'Authorization': `Bearer ${this.authService.token}`
       }
