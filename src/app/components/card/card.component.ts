@@ -1,6 +1,12 @@
 import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, registerLocaleData } from '@angular/common';
 import { Card, CardsService } from 'src/app/services/cards.service';
+import localePt from '@angular/common/locales/pt';
+import localeDe from '@angular/common/locales/de';
+
+// Registra os locales que você vai usar
+registerLocaleData(localePt, 'pt-BR');
+registerLocaleData(localeDe, 'de-DE');
 
 @Component({
   selector: 'app-card',
@@ -16,6 +22,19 @@ export class CardComponent implements OnInit {
 
   ngOnInit() {
     this.listCards();
+  }
+
+  // Adicione esta função
+  public getLocaleByCurrency(currencyCode: string): string {
+    switch (currencyCode) {
+      case 'BRL':
+        return 'pt-BR';
+      case 'EUR':
+        return 'de-DE';
+      case 'USD':
+      default:
+        return 'en-US';
+    }
   }
 
   listCards() {

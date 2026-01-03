@@ -8,7 +8,7 @@ export interface Card {
   id: string;
   cardName: string;
   totalSpent: number;
-  cardbank: string;
+  cardBank: string;
   cardFinalNumbers: string;
   dueDate: number;
   limit: number;

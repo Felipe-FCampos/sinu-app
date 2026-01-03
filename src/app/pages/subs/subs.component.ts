@@ -10,11 +10,14 @@ import { SubscriptionsComponent } from 'src/app/components/subscriptions/subscri
 })
 export class SubsComponent implements OnInit {
 
+  appName!: string;
   user: UserData | null = null;
 
   constructor(
     private userService: UserService
-  ) { }
+  ) {
+    this.appName = this.userService.appName;
+   }
 
   ngOnInit() {
     this.userService.getUserData().subscribe({

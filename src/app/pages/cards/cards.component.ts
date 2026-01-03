@@ -9,12 +9,16 @@ import { UserData, UserService } from 'src/app/services/user.service';
   styleUrls: ['./cards.component.scss'],
 })
 export class CardsComponent implements OnInit {
+
+  appName!: string;
   user: UserData | null = null;
   isLoading: boolean = true;
 
   constructor(
     private userService: UserService
-  ) { }
+  ) {
+    this.appName = this.userService.appName;
+  }
 
   ngOnInit() {
     this.userService.getUserData().subscribe({

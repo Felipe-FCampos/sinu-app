@@ -18,6 +18,7 @@ import { UserData } from './services/user.service';
 })
 export class AppComponent implements OnInit {
 
+  appName: string = 'Sinu v1.0';
   apiUrl = environment.apiUrl;
   isLoading: boolean = true; // Adiciona o estado de carregamento
   user: UserData | null = null;

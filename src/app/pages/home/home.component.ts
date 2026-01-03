@@ -13,12 +13,15 @@ import { DashboardComponent } from 'src/app/components/dashboard/dashboard.compo
 })
 export class HomeComponent implements OnInit{
 
+  appName!: string;
   user: UserData | null = null;
   isLoading: boolean = true;
 
   constructor(
     private userService: UserService
-  ) { }
+  ) {
+    this.appName = this.userService.appName;
+   }
 
   ngOnInit() {
     this.userService.getUserData().subscribe({

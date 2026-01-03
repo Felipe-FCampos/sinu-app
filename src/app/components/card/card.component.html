@@ -7,14 +7,16 @@
           <span>Final {{ card.cardFinalNumbers }}</span>
         </div>
         <div class="card-body">
-          <p>Banco: {{ card.cardbank }}</p>
-          <p>Limite: {{ card.limit | currency:'BRL' }}</p>
-          <p>Gasto Total: {{ card.totalSpent | currency:'BRL' }}</p>
-          <p>Vencimento: Dia {{ card.dueDate }}</p>
+          <p>Banco: {{ card.cardBank }}</p>
+          <p>Limite: {{ card.limit / 100 | currency: ('BRL') : 'symbol' : undefined : getLocaleByCurrency('BRL') }}</p>
+          <p>Gasto Total: {{ card.totalSpent / 100 | currency: ('BRL') : 'symbol' : undefined : getLocaleByCurrency('BRL') }}</p>
+          <p>Dia de vencimento: {{ card.dueDate }}</p>
+          <p>{{ (card.limit - card.totalSpent) / 100 | currency: ('BRL') : 'symbol' : undefined : getLocaleByCurrency('BRL')}}</p>
         </div>
       </div>
     }
   } @else {
     <p>Nenhum cartão encontrado.</p>
   }
+  <button class="add-card-button">+</button>
 </section>
