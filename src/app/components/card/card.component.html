@@ -1,22 +1,153 @@
 <section class="cards-container">
   @if (cards.length > 0) {
-    @for (card of cards; track card.id) {
-      <div class="card-item">
-        <div class="card-header">
-          <h3>{{ card.cardName }}</h3>
-          <span>Final {{ card.cardFinalNumbers }}</span>
-        </div>
-        <div class="card-body">
+  @for (card of cards; track card.id) {
+  <div class="card-item" (click)="openUpdateCardForm(card)">
+    <div class="card-header">
+      <h3>{{ card.cardName }}</h3>
+      <span>Final {{ card.cardFinalNumbers }}</span>
+    </div>
+    <div class="card-body">
+      <div class="card-details">
+        <div class="bank-info">
           <p>Banco: {{ card.cardBank }}</p>
-          <p>Limite: {{ card.limit / 100 | currency: ('BRL') : 'symbol' : undefined : getLocaleByCurrency('BRL') }}</p>
-          <p>Gasto Total: {{ card.totalSpent / 100 | currency: ('BRL') : 'symbol' : undefined : getLocaleByCurrency('BRL') }}</p>
           <p>Dia de vencimento: {{ card.dueDate }}</p>
-          <p>{{ (card.limit - card.totalSpent) / 100 | currency: ('BRL') : 'symbol' : undefined : getLocaleByCurrency('BRL')}}</p>
+        </div>
+        <div class="spending-info">
+          <span>
+            <p>Gasto:</p>
+            <p>{{ card.totalSpent / 100 | currency: ('BRL') : 'symbol' : undefined : getLocaleByCurrency('BRL')}}</p>
+          </span>
+          <span>
+            <p>Limite:</p>
+            <p>{{ card.limit / 100 | currency: ('BRL') : 'symbol' : undefined : getLocaleByCurrency('BRL') }}</p>
+          </span>
         </div>
       </div>
-    }
-  } @else {
-    <p>Nenhum cartão encontrado.</p>
+
+      <!-- Barra de Progresso -->
+      <div class="progress-bar-container">
+        <div class="progress-bar" [style.width.%]="(card.totalSpent / card.limit) * 100"></div>
+      </div>
+
+      <p class="limit-available">
+        <span>Disponível:</span>
+        <span>{{ (card.limit - card.totalSpent) / 100 | currency: ('BRL') : 'symbol' : undefined :
+          getLocaleByCurrency('BRL')}}</span>
+      </p>
+    </div>
+  </div>
   }
-  <button class="add-card-button">+</button>
+  } @else {
+    <div class="no-cards-message">
+      <p>Nenhum cartão encontrado.</p>
+      <p>Clique no botão '+' para adicionar seu primeiro cartão!</p>
+    </div>
+  }
+  <button class="add-card-button" (click)="openAddCardForm()">+</button>
 </section>
+
+<!-- Formulário de Adicionar Cartão -->
+<section style="display: none;" class="add-card-section">
+  <div class="form-header">
+    <h2>Adicionar Novo Cartão</h2>
+    <button class="close-button" (click)="closeAddCardForm()">
+      <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#2c2c2c"><path d="m256-200-56-56 224-224-224-224 56-56 224 224 224-224 56 56-224 224 224 224-56 56-224-224-224 224Z" /></svg>
+    </button>
+  </div>
+  <form (ngSubmit)="addCard()">
+    <label for="cardName">Nome do Cartão:</label>
+    <input id="cardName" [(ngModel)]="newCard.cardName" name="cardName" required />
+
+    <label for="limit">Limite:</label>
+    <input id="limit" type="text" inputmode="decimal" [(ngModel)]="newCard.limit" name="limit" appCurrencyMask required />
+
+    <label for="cardBank">Banco:</label>
+    <select id="cardBank" [(ngModel)]="newCard.cardBank" name="cardBank" required>
+      @for (bank of banks; track bank + i; let i = $index) {
+        <option [value]="bank" [disabled]="bank === 'Selecione um banco'">{{ bank }}</option>
+      }
+    </select>
+
+    <label for="cardFinalNumbers">4 Últimos Dígitos:</label>
+    <input id="cardFinalNumbers" [(ngModel)]="newCard.cardFinalNumbers" name="cardFinalNumbers" maxlength="4" required />
+
+    <label for="dueDate">Dia do Vencimento:</label>
+    <select id="dueDate" [(ngModel)]="newCard.dueDate" name="dueDate" required>
+      @for (day of days; track day) { <option [ngValue]="day">{{ day }}</option> }
+    </select>
+
+    <button type="submit" [disabled]="isSubmitting">{{ isSubmitting ? 'Adicionando...' : 'Adicionar Cartão' }}</button>
+  </form>
+</section>
+
+<!-- Formulário de Editar Cartão -->
+<section style="display: none;" class="update-card-section">
+    <div class="form-header">
+        <h2>Editar Cartão</h2>
+        <button class="close-button" (click)="closeUpdateCardForm()">
+            <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#2c2c2c"><path d="m256-200-56-56 224-224-224-224 56-56 224 224 224-224 56 56-224 224 224 224-56 56-224-224-224 224Z" /></svg>
+        </button>
+    </div>
+    <form (ngSubmit)="updateCard()">
+        <label for="updateCardName">Nome do Cartão:</label>
+        <input id="updateCardName" [(ngModel)]="newCard.cardName" name="updateCardName" required />
+
+        <label for="updateLimit">Limite:</label>
+        <input id="updateLimit" type="text" inputmode="decimal" [(ngModel)]="newCard.limit" name="updateLimit" appCurrencyMask required />
+
+        <label for="updateCardBank">Banco:</label>
+        <select id="updateCardBank" [(ngModel)]="newCard.cardBank" name="updateCardBank" required>
+            @for (bank of banks; track bank + i; let i = $index) {
+              <option [value]="bank" [disabled]="bank === 'Selecione um banco'">{{ bank }}</option>
+            }
+        </select>
+
+        <label for="updateCardFinalNumbers">4 Últimos Dígitos:</label>
+        <input id="updateCardFinalNumbers" [(ngModel)]="newCard.cardFinalNumbers" name="updateCardFinalNumbers" maxlength="4" required />
+
+        <label for="updateDueDate">Dia do Vencimento:</label>
+        <select id="updateDueDate" [(ngModel)]="newCard.dueDate" name="updateDueDate" required>
+            @for (day of days; track day) { <option [ngValue]="day">{{ day }}</option> }
+        </select>
+
+        <div style="display: flex; justify-content: space-between; gap: 8px;">
+            <button type="submit" [disabled]="isSubmitting">{{ isSubmitting ? 'Salvando...' : 'Salvar' }}</button>
+            <button type="button" (click)="deleteCard(editingCardId!)" [disabled]="isSubmitting || !editingCardId" class="delete-button">
+                {{ isSubmitting ? 'Apagando...' : 'Apagar' }}
+            </button>
+        </div>
+    </form>
+</section>
+
+<div style="display: none;" class="div_background_modal"></div>
+
+<!-- Modais de Sucesso -->
+@if (showAddSuccess) {
+<div class="success-modal">
+  <div class="success-modal-backdrop"></div>
+  <div class="success-modal-content">
+    <p>Cartão adicionado com sucesso!</p>
+    <button (click)="showAddSuccess = false">OK</button>
+  </div>
+</div>
+}
+
+@if (showUpdateSuccess) {
+<div class="success-modal">
+  <div class="success-modal-backdrop"></div>
+  <div class="success-modal-content">
+    <p>Cartão alterado com sucesso!</p>
+    <button (click)="showUpdateSuccess = false">OK</button>
+  </div>
+</div>
+}
+
+@if (showDeleteSuccess) {
+<div class="success-modal">
+  <div class="success-modal-backdrop"></div>
+  <div class="success-modal-content">
+    <p>Cartão apagado com sucesso!</p>
+    <button (click)="showDeleteSuccess = false">OK</button>
+  </div>
+</div>
+}

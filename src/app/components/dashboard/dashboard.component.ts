@@ -76,11 +76,6 @@ export class DashboardComponent implements OnInit {
       switch (sub.status) {
         case SubscriptionStatus.Active:
           this.activeSubscriptionsCount++;
-          // Adiciona ao custo total apenas se estiver ativa
-          if (!this.totalCostsByCurrency[sub.currency]) {
-            this.totalCostsByCurrency[sub.currency] = 0;
-          }
-          this.totalCostsByCurrency[sub.currency] += sub.price;
           break;
         case SubscriptionStatus.Expiring:
           this.dueSubscriptionsCount++;
@@ -92,6 +87,15 @@ export class DashboardComponent implements OnInit {
           this.disabledSubscriptionsCount++;
           break;
       }
+
+      // Adiciona ao custo total se estiver ativa ou a vencer
+      if (sub.status === SubscriptionStatus.Active || sub.status === SubscriptionStatus.Expiring) {
+        if (!this.totalCostsByCurrency[sub.currency]) {
+          this.totalCostsByCurrency[sub.currency] = 0;
+        }
+        this.totalCostsByCurrency[sub.currency] += sub.price;
+      }
+
       this.totalSubscriptionsCount++;
     });
   }
