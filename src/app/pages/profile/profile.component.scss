@@ -13,6 +13,12 @@
         gap: 16px;
         width: 100%;
 
+        .back-button-profile {
+            position: absolute;
+            top: 16px;
+            left: 16px;
+        }
+
         .user-info {
             display: flex;
             flex-direction: column;

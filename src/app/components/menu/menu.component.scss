@@ -39,3 +39,13 @@
 .menu-item:hover {
     background: #e0e0e0;
 }
+
+.div-menu-item.active-link {
+  .menu-item {
+    background-color: #4a4a4a;
+    border-radius: 50%;
+      & svg {
+        fill: #f9f9f9;
+      }
+  }
+}

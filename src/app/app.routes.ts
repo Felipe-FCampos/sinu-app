@@ -8,6 +8,7 @@ import { ProfileComponent } from './pages/profile/profile.component';
 import { CardsComponent } from './pages/cards/cards.component';
 import { InfoCardComponent } from './pages/info-card/info-card.component';
 import { SapsComponent } from './pages/saps/saps.component';
+import { SettingsComponent } from './pages/settings/settings.component';
 
 export const routes: Routes = [
     {
@@ -28,6 +29,7 @@ export const routes: Routes = [
             { path: 'profile', component: ProfileComponent },
             { path: 'cards', component: CardsComponent },
             { path: 'card/:id', component: InfoCardComponent },
+            { path: 'settings', component: SettingsComponent },
         ],
     }
 ];
