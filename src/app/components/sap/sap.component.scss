@@ -1,0 +1,307 @@
+// --- Estilos para o Dropdown de Pagamentos ---
+
+// Container principal da seção
+section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px; // Espaçamento entre os dropdowns de cada mês
+}
+
+.invoices-dropdown {
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  overflow: hidden; // Garante que o conteúdo respeite as bordas arredondadas
+
+  summary {
+    padding: 16px 24px;
+    font-weight: 600;
+    color: #444;
+    background-color: #f9f9f9;
+    cursor: pointer;
+    list-style: none; // Remove a seta padrão
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: background-color 0.2s;
+
+    &::-webkit-details-marker {
+      display: none; // Remove a seta padrão no Chrome/Safari
+    }
+
+    &:hover {
+      background-color: #f1f1f1;
+    }
+
+    // Adiciona uma seta customizada (reutilizando o estilo de cards-info)
+    &::after {
+      content: '';
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      // Usando um SVG embutido para a seta para baixo, que é mais apropriado
+      background-image: url('/assets/arrow_back.svg');
+      background-size: contain;
+      background-repeat: no-repeat;
+      background-position: center;
+      transform: rotate(180deg);
+      transition: transform 0.3s ease-in-out;
+    }
+  }
+
+  // Gira a seta quando o dropdown está aberto
+  &[open] > summary::after {
+    transform: rotate(270deg);
+  }
+
+  .dropdown-content {
+    padding: 8px 24px 16px;
+    background-color: #fff;
+  }
+}
+
+// Estilo para cada item de pagamento dentro do dropdown
+.sap-item {
+  padding: 12px 0;
+  border-bottom: 1px solid #f0f0f0;
+
+  &:last-child {
+    border-bottom: none; // Remove a borda do último item
+  }
+
+  .sap-details {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 4px;
+
+    h3 {
+      margin: 0;
+      font-size: 16px;
+      font-weight: 600;
+      color: #333;
+    }
+
+    p {
+      margin: 0;
+      font-size: 16px;
+      font-weight: 600;
+      color: #2c2c2c;
+    }
+  }
+
+  // Estilo para a data da compra
+  > p {
+    margin: 0;
+    font-size: 12px;
+    color: #666;
+  }
+}
+
+// Mensagem para quando não há pagamentos
+.no-subscriptions-message {
+  text-align: center;
+  padding: 50px 20px;
+  color: #2c2c2c;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  min-height: 200px;
+
+  p {
+    margin: 5px 0;
+    font-size: 18px;
+    font-weight: 500;
+  }
+}
+
+// --- Estilos para o Modal de Adicionar Pagamento (copiados de subscriptions.component.scss) ---
+
+.add-subscription-button {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    border: none;
+    font-size: 44px;
+    background-color: #111;
+    color: #fff;
+    font-weight: 300;
+    cursor: pointer;
+    align-self: flex-start;
+    position: fixed;
+    bottom: 20%;
+    right: 20px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+    z-index: 99;
+}
+
+.div_background_modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100vh;
+    background-color: rgba(44, 44, 44, 0.35);
+    z-index: 999;
+}
+
+.add-subscription-section {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: #ffffff;
+  box-shadow: 0px 3px 6px rgba(0, 0, 0, 0.3);
+  border-radius: 8px;
+  padding: 24px;
+  z-index: 1000;
+  width: 90vw;
+  max-width: 480px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+
+  hr {
+    background-color: #e0e0e0;
+    width: 100%;
+    height: 1px;
+    border: none;
+    margin-block: 8px;
+  }
+
+  h2 {
+    margin: 0 0 8px;
+  }
+
+  form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  label {
+    font-size: 14px;
+    font-weight: 500;
+    color: #2c2c2c;
+  }
+
+  input, select {
+    width: 100%;
+    padding: 8px 10px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+    box-sizing: border-box;
+    background-color: #fff;
+    font-size: 14px;
+  }
+
+  button[type="submit"] {
+    margin-top: 8px;
+    width: 100%;
+    padding: 10px 0;
+    border-radius: 6px;
+    border: none;
+    background-color: #111;
+    color: #fff;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+}
+
+.add-subscription-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.close-button {
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+}
+
+.name-container, .card-bank-container {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.price-currency-container, .card-info-container {
+  display: flex;
+  gap: 12px;
+}
+
+.price-currency-group {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.loader-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  z-index: 1001;
+}
+
+.spinner {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 4px solid #ccc;
+  border-top-color: #111;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.success-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 1100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.success-modal-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.35);
+}
+
+.success-modal-content {
+  position: relative;
+  background: #fff;
+  padding: 16px 24px;
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+  z-index: 1101;
+  text-align: center;
+  min-width: 260px;
+}
+
+.success-modal-content p {
+  margin: 0 0 12px;
+  font-weight: 500;
+}
+
+.success-modal-content button {
+  padding: 8px 16px;
+  border-radius: 6px;
+  border: none;
+  background: #111;
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+}

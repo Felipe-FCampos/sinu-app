@@ -34,6 +34,7 @@
         <span>{{ (card.limit - card.totalSpent) / 100 | currency: ('BRL') : 'symbol' : undefined :
           getLocaleByCurrency('BRL')}}</span>
       </p>
+      <a [routerLink]="['/card', card.id ]" class="access-invoices-button">Acessar faturas</a>
     </div>
   </div>
   }
@@ -76,6 +77,11 @@
       @for (day of days; track day) { <option [ngValue]="day">{{ day }}</option> }
     </select>
 
+    <label for="closeDay">Dia do fechamento:</label>
+    <select id="closeDay" [(ngModel)]="newCard.closeDay" name="closeDay" required>
+      @for (day of days; track day) { <option [ngValue]="day">{{ day }}</option> }
+    </select>
+
     <button type="submit" [disabled]="isSubmitting">{{ isSubmitting ? 'Adicionando...' : 'Adicionar Cartão' }}</button>
   </form>
 </section>
@@ -107,6 +113,11 @@
 
         <label for="updateDueDate">Dia do Vencimento:</label>
         <select id="updateDueDate" [(ngModel)]="newCard.dueDate" name="updateDueDate" required>
+            @for (day of days; track day) { <option [ngValue]="day">{{ day }}</option> }
+        </select>
+
+        <label for="closeDay">Dia do fechamento:</label>
+        <select id="closeDay" [(ngModel)]="newCard.closeDay" name="closeDay" required>
             @for (day of days; track day) { <option [ngValue]="day">{{ day }}</option> }
         </select>
 

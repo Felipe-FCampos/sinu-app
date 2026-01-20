@@ -6,6 +6,7 @@ import localeDe from '@angular/common/locales/de'; // Exemplo se você mapear 'E
 import { CreateSubscriptionPayload, SubscriptionsService } from 'src/app/services/subscriptions.service';
 import { FormsModule } from '@angular/forms';
 import { CurrencyMaskDirective } from '../../currency-mask.directive'; // 1. Importe a diretiva
+import { Card, CardsService } from 'src/app/services/cards.service'; // 1. Importar Card e CardsService
 
 registerLocaleData(localePt, 'pt-BR');
 registerLocaleData(localeDe, 'de-DE');
@@ -46,12 +47,16 @@ export interface Subscription {
   styleUrls: ['./subscriptions.component.scss']
 })
 export class SubscriptionsComponent implements OnInit {
-
-  constructor(private subscriptionsService: SubscriptionsService) { }
+  constructor(
+    private subscriptionsService: SubscriptionsService,
+    private cardsService: CardsService // 4. Injetar o CardsService
+  ) { }
 
   editingSubscriptionId: string | null = null;
 
   subscriptions: Subscription[] = [];
+
+  isUpdateMode: boolean = false;
 
   // ADICIONE ESTA PROPRIEDADE
   public subscriptionTypes = [
@@ -67,11 +72,11 @@ export class SubscriptionsComponent implements OnInit {
     { value: 'OTHER', label: 'Outros' }
   ];
 
-  isSubmitting = false;   // 👈 loader
-  showSuccess = false;    // 👈 modal de sucesso para ADIÇÃO
-  showUpdateSuccess = false; // 👈 modal de sucesso para ATUALIZAÇÃO
-  showDeleteSuccess = false; // 👈 modal de sucesso para EXCLUSÃO
-  showPaymentSuccess = false; // 👈 modal para pagamento
+  isSubmitting = false;   // loader
+  showSuccess = false;    // modal de sucesso para ADIÇÃO
+  showUpdateSuccess = false; // modal de sucesso para ATUALIZAÇÃO
+  showDeleteSuccess = false; // modal de sucesso para EXCLUSÃO
+  showPaymentSuccess = false; // modal para pagamento
 
   days: number[] = Array.from({ length: 30 }, (_, i) => i + 1); // Gera os dias de 1 a 30
 
@@ -88,6 +93,15 @@ export class SubscriptionsComponent implements OnInit {
     paymentMethod: 'CREDIT_CARD',
     status: SubscriptionStatus.Active
   };
+
+  public availableCards: Card[] = [];
+  public showManualCardInput = false;
+
+  // 1. Adicionar a lista de bancos
+  public bankList = [
+    'Banco do Brasil', 'Caixa Econômica', 'Itaú', 'Bradesco', 'Santander', 
+    'Banco Inter', 'PicPay', 'Nubank', 'C6 Bank', 'Outro'
+  ];
 
   resetNewSubscription() {
     this.newSubscription = {
@@ -108,7 +122,12 @@ export class SubscriptionsComponent implements OnInit {
   }
 
   ngOnInit() {
+    this.loadInitialData();
+  }
+
+  loadInitialData() {
     this.listSubscriptions();
+    this.loadAvailableCards();
   }
 
   public getLocaleByCurrency(currencyCode: string): string {
@@ -163,27 +182,20 @@ export class SubscriptionsComponent implements OnInit {
 
   openUpdateSubscriptionForm(subscription: Subscription) {
     this.editingSubscriptionId = subscription.id;
+    this.newSubscription = { ...subscription };
 
-    this.newSubscription = {
-      name: subscription.name,
-      description: subscription.description,
-      price: subscription.price,
-      currency: subscription.currency,
-      subscriptionType: subscription.subscriptionType,
-      billingDay: subscription.billingDay,
-      billingFrequency: subscription.billingFrequency,
-      createdDate: subscription.createdDate,          // mantém a original
-      nextPayment: subscription.nextPayment,
-      paymentMethod: subscription.paymentMethod,
-      status: subscription.status,
-      cardBank: subscription.cardBank ?? null,
-      cardFinalNumbers: subscription.cardFinalNumbers ?? ''
-    };
+    const cardExists = this.availableCards.some(c => c.cardFinalNumbers === subscription.cardFinalNumbers);
+    if ((subscription.paymentMethod === 'CREDIT_CARD' || subscription.paymentMethod === 'DEBIT_CARD') && !cardExists) {
+      this.showManualCardInput = true;
+    } else {
+      this.showManualCardInput = false;
+    }
 
-    const forms = document.querySelector('.update-subscription-section') as HTMLElement;
+    this.isUpdateMode = true;
+    const modal = document.querySelector('.update-subscription-section') as HTMLElement;
     const div = document.querySelector('.div_background_modal') as HTMLElement;
     div.style.display = 'block';
-    forms.style.display = 'block';
+    modal.style.display = 'block';
   }
 
   closeUpdateSubscriptionForm() {
@@ -384,6 +396,34 @@ export class SubscriptionsComponent implements OnInit {
       error: (err) => {
         // Mantive o alert para o erro, mas você pode criar um modal de erro também
         alert(`Erro ao processar o pagamento: ${err.message || 'Tente novamente.'}`);
+      }
+    });
+  }
+
+  // 7. Adicionar método para lidar com a seleção no dropdown
+  onCardSelectionChange(selectedValue: string) {
+    if (selectedValue === 'manual') {
+      this.showManualCardInput = true;
+      this.newSubscription.cardFinalNumbers = '';
+      this.newSubscription.cardBank = ''; // Limpa para nova seleção no dropdown de bancos
+    } else {
+      this.showManualCardInput = false;
+      const selectedCard = this.availableCards.find(c => c.cardFinalNumbers === selectedValue);
+      if (selectedCard) {
+        this.newSubscription.cardBank = selectedCard.cardBank;
+        this.newSubscription.cardFinalNumbers = selectedCard.cardFinalNumbers;
+      }
+    }
+  }
+
+  // 6. Adicionar método para carregar os cartões
+  loadAvailableCards() {
+    this.cardsService.getAllCards().subscribe({
+      next: (response) => {
+        this.availableCards = response.cards;
+      },
+      error: (err) => {
+        console.error('Erro ao buscar cartões:', err);
       }
     });
   }

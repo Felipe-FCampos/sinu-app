@@ -5,6 +5,7 @@ import localePt from '@angular/common/locales/pt';
 import localeDe from '@angular/common/locales/de';
 import { FormsModule } from '@angular/forms';
 import { CurrencyMaskDirective } from '../../currency-mask.directive';
+import { RouterLink } from '@angular/router';
 
 registerLocaleData(localePt, 'pt-BR');
 registerLocaleData(localeDe, 'de-DE');
@@ -12,9 +13,9 @@ registerLocaleData(localeDe, 'de-DE');
 @Component({
   selector: 'app-card',
   standalone: true,
-  imports: [CommonModule, FormsModule, CurrencyMaskDirective],
+  imports: [CommonModule, FormsModule, CurrencyMaskDirective, RouterLink],
   templateUrl: './card.component.html',
-  styleUrl: './card.component.scss',
+  styleUrls: ['./card.component.scss'],
 })
 export class CardComponent implements OnInit {
   cards: Card[] = [];
@@ -33,6 +34,7 @@ export class CardComponent implements OnInit {
     cardBank: 'Selecione um banco',
     cardFinalNumbers: '',
     dueDate: null,
+    closeDay: null,
     status: 1,
   };
 
@@ -40,8 +42,8 @@ export class CardComponent implements OnInit {
   days: number[] = Array.from({ length: 31 }, (_, i) => i + 1);
   banks: string[] = [
     'Selecione um banco',
-    'Banco do Brasil', 'Caixa Econômica', 'Itaú', 'Bradesco',
-    'Santander', 'Banco Inter', 'PicPay', 'Nubank', 'Outro'
+    'Banco do Brasil', 'Caixa Econômica', 'Itaú', 'Bradesco', 'Santander', 
+    'Banco Inter', 'PicPay', 'Nubank', 'C6 Bank', 'Outro'
   ];
 
   constructor(private cardsService: CardsService) { }
@@ -57,6 +59,7 @@ export class CardComponent implements OnInit {
       cardBank: 'Selecione um banco',
       cardFinalNumbers: '',
       dueDate: null,
+      closeDay: null,
       status: 1,
     };
   }
@@ -90,6 +93,7 @@ export class CardComponent implements OnInit {
       cardBank: card.cardBank,
       cardFinalNumbers: card.cardFinalNumbers,
       dueDate: card.dueDate,
+      closeDay: card.closeDay,
       status: card.status,
     };
     const form = document.querySelector('.update-card-section') as HTMLElement;
@@ -139,6 +143,7 @@ export class CardComponent implements OnInit {
       cardBank: this.newCard.cardBank,
       cardFinalNumbers: this.newCard.cardFinalNumbers,
       dueDate: this.newCard.dueDate,
+      closeDay: this.newCard.closeDay,
       status: this.newCard.status,
     };
 
@@ -174,6 +179,7 @@ export class CardComponent implements OnInit {
       cardBank: this.newCard.cardBank,
       cardFinalNumbers: this.newCard.cardFinalNumbers,
       dueDate: this.newCard.dueDate,
+      closeDay: this.newCard.closeDay,
       status: this.newCard.status,
     };
 
@@ -195,10 +201,6 @@ export class CardComponent implements OnInit {
         this.isSubmitting = false;
       },
     });
-  }
-
-  testeeee() {
-    alert(1)
   }
 
   deleteCard(cardId: string) {

@@ -1,0 +1,95 @@
+@if (isLoading) {
+<p>Carregando informações do cartão...</p>
+} @else if (error) {
+<div class="error-message">
+    <p>{{ error }}</p>
+</div>
+} @else if (card) {
+<div class="card-info-container">
+    <header class="card-info-header">
+        <h1>
+            <a href="/cards">
+                <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px" fill="#2c2c2c"><path d="M0 0h24v24H0V0z" fill="none" opacity=".87"/><path d="M16.62 2.99c-.49-.49-1.28-.49-1.77 0L6.54 11.3c-.39.39-.39 1.02 0 1.41l8.31 8.31c.49.49 1.28.49 1.77 0s.49-1.28 0-1.77L9.38 12l7.25-7.25c.48-.48.48-1.28-.01-1.76z"/></svg>
+            </a>
+            {{ card.cardName }}
+        </h1>
+        <p>{{ card.cardFinalNumbers }} - {{ card.cardBank }}</p>
+    </header>
+
+    <section class="card-info-body">
+        <div class="amounts-info">
+            <p>{{ card.totalSpent / 100 | currency: 'BRL' }}</p>
+            <p>{{ card.limit / 100 | currency: 'BRL' }}</p>
+        </div>
+
+        <!-- Barra de Progresso -->
+        <div class="progress-bar-container">
+            <div class="progress-bar" [style.width.%]="(card.totalSpent / card.limit) * 100"></div>
+        </div>
+
+        <div class="card-info-footer">
+            <div class="card-info-dueDate"><p><strong>Dia do Vencimento:</strong></p> <p>{{ card.dueDate }}</p></div>
+            <div class="card-info-limit"><p><strong>Limite Disponível:</strong></p> <p>{{ (card.limit - card.totalSpent) / 100 | currency: 'BRL' }}</p></div>
+        </div>
+    </section>
+
+    <section class="invoices-section">
+        <!-- Dropdown para a lista de assinaturas -->
+        @if (subscriptions.length > 0) {
+          <details class="invoices-dropdown">
+            <summary>
+              Cobranças recorrentes ({{ subscriptions.length }})
+            </summary>
+            <div class="dropdown-content">
+              @for (subscription of subscriptions; track subscription.id) {
+                <div class="subscription-item">
+                    <p>{{ subscription.name }}</p>
+                    <p>{{ subscription.price / 100 | currency: 'BRL' }}</p>
+                </div>
+              }
+            </div>
+          </details>
+        } @else {
+          <p>Nenhuma assinatura encontrada para este cartão.</p>
+        }
+
+        <!-- Dropdown para a lista de pagamentos avulsos -->
+        @if (standalonePayments.length > 0) {
+          <details class="invoices-dropdown">
+            <summary>
+              Pagamentos Avulsos ({{ standalonePayments.length }})
+            </summary>
+            <div class="dropdown-content">
+              @for (payment of standalonePayments; track payment.id) {
+                <div class="subscription-item">
+                    <p>{{ payment.title }}</p>
+                    <p>{{ payment.price / 100 | currency: 'BRL' }}</p>
+                </div>
+              }
+            </div>
+          </details>
+        } @else {
+          <p>Nenhum pagamento avulso encontrado para este cartão.</p>
+        }
+        <h2>Faturas</h2>
+        @for (invoice of invoices; track invoice.id) {
+          <details class="invoices-dropdown">
+            <summary>
+              <span>Fatura de {{ invoice.closeDate | date: 'MM/yy' }}</span>
+              <span>{{ invoice.totalAmount / 100 | currency: 'BRL' }}</span>
+            </summary>
+            <div class="dropdown-content">
+              @for (item of invoice.items; track item.originalPaymentId + item.installmentNumber) {
+                <div class="subscription-item">
+                  <p>{{ item.title }} ({{item.installmentNumber}}/{{item.totalInstallments}})</p>
+                  <p>{{ item.price / 100 | currency: 'BRL' }}</p>
+                </div>
+              }
+            </div>
+          </details>
+        } @empty {
+          <p>Nenhuma fatura encontrada para este cartão.</p>
+        }
+    </section>
+</div>
+}

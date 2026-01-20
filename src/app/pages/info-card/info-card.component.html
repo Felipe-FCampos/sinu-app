@@ -1,0 +1,14 @@
+<section class="info-page">
+
+  <div class="subscriptions-section">
+    <!-- Passe os dados para o componente filho -->
+    <app-cards-info 
+      [card]="card" 
+      [subscriptions]="subscriptions"
+      [standalonePayments]="standalonePayments"
+      [invoices]="invoices"
+      [isLoading]="isLoading" 
+      [error]="error">
+    </app-cards-info>
+  </div>
+</section>

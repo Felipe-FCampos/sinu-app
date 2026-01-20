@@ -6,6 +6,8 @@ import { RegisterComponent } from './register/register.component';
 import { SubsComponent } from './pages/subs/subs.component';
 import { ProfileComponent } from './pages/profile/profile.component';
 import { CardsComponent } from './pages/cards/cards.component';
+import { InfoCardComponent } from './pages/info-card/info-card.component';
+import { SapsComponent } from './pages/saps/saps.component';
 
 export const routes: Routes = [
     {
@@ -22,8 +24,10 @@ export const routes: Routes = [
         children: [
             { path: '', component: HomeComponent },
             { path: 'subscriptions', component: SubsComponent },
+            { path: 'standalonepayments', component: SapsComponent },
             { path: 'profile', component: ProfileComponent },
             { path: 'cards', component: CardsComponent },
+            { path: 'card/:id', component: InfoCardComponent },
         ],
     }
 ];

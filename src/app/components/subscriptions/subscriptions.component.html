@@ -131,25 +131,41 @@
 
       <!-- Adicione a mesma condição @if aqui -->
       @if (newSubscription.paymentMethod === 'CREDIT_CARD' || newSubscription.paymentMethod === 'DEBIT_CARD') {
-        <div class="card-info-container">
+        <div class="card-info-container" style="flex-direction: column;">
+          
+          <!-- Dropdown de seleção de cartão -->
           <div class="card-bank-container">
-            <label for="cardBank">Banco:</label>
-            <select id="cardBank" [(ngModel)]="newSubscription.cardBank" name="cardBank">
-              <option value="Banco do Brasil">Banco do Brasil</option>
-              <option value="Caixa Econômica">Caixa Econômica</option>
-              <option value="Itaú">Itaú</option>
-              <option value="Bradesco">Bradesco</option>
-              <option value="Santander">Santander</option>
-              <option value="Banco Inter">Banco Inter</option>
-              <option value="PicPay">PicPay</option>
-              <option value="Nubank">Nubank</option>
+            <label for="cardSelection">Cartão:</label>
+            <select id="cardSelection" 
+                    [ngModel]="newSubscription.cardFinalNumbers" 
+                    (ngModelChange)="onCardSelectionChange($event)" 
+                    name="cardSelection">
+              <option value="" disabled>Selecione um cartão</option>
+              @for (card of availableCards; track card.id) {
+                <option [value]="card.cardFinalNumbers">{{ card.cardName }} (Final {{ card.cardFinalNumbers }})</option>
+              }
+              <option value="manual">Digitar manualmente...</option>
             </select>
           </div>
   
-          <div class="card-last-numbers-container">
-            <label for="cardLastNumbers">Últimos Números do Cartão:</label>
-            <input id="cardLastNumbers" [(ngModel)]="newSubscription.cardFinalNumbers" name="cardLastNumbers" />
-          </div>
+          <!-- Campos para inserção manual (condicional) -->
+          @if (showManualCardInput) {
+            <div class="price-currency-container">
+              <div class="card-bank-container price-currency-group">
+                <label for="manualCardBank">Banco:</label>
+                <select id="manualCardBank" [(ngModel)]="newSubscription.cardBank" name="manualCardBank">
+                  <option value="" disabled>Selecione o banco</option>
+                  @for (bank of bankList; track bank) {
+                    <option [value]="bank">{{ bank }}</option>
+                  }
+                </select>
+              </div>
+              <div class="card-last-numbers-container price-currency-group">
+                <label for="manualCardNumbers">Últimos 4 Números:</label>
+                <input id="manualCardNumbers" [(ngModel)]="newSubscription.cardFinalNumbers" name="manualCardNumbers" />
+              </div>
+            </div>
+          }
         </div>
       }
 

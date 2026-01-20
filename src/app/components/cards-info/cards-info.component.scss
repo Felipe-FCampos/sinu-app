@@ -1,0 +1,203 @@
+.card-info-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    h1 {
+        font-size: 20px;
+        color: #2c2c2c;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+
+        a {
+            width: 24px;
+            height: 24px;
+        }
+    }
+
+    p {
+        font-size: 14px;
+        background-color: #f5f5f5;
+        padding: 4px 8px;
+        border-radius: 10px;
+    }
+}
+
+.card-info-body {
+    margin: 20px 0 15px 0;
+    padding-block: 20px;
+    padding-inline: 20px;
+    background-color: #f9f9f9;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+
+    .card-info-footer {
+        display: flex;
+        flex-direction: column;
+        margin-top: 16px;
+
+        .card-info-dueDate {
+            display: flex;
+            justify-content: space-between;
+            font-size: 14px;
+            color: red;
+            margin-bottom: 12px;
+
+            strong {
+                font-weight: 600;
+                font-size: 16px;
+            }
+            p {
+                font-weight: 600;
+                font-size: 20px;
+            }
+        }
+
+        .card-info-limit {
+            display: flex;
+            justify-content: space-between;
+            font-size: 14px;
+            color: red;
+
+            strong {
+                font-weight: 600;
+                font-size: 16px;
+            }
+            p {
+                font-weight: 600;
+                font-size: 20px;
+            }
+        }
+
+        p {
+            margin: 0;
+            font-size: 14px;
+            color: #444;
+
+            strong {
+                font-weight: 600;
+            }
+        }
+    }
+}
+
+// Estilos para a barra de progresso
+.progress-bar-container {
+  background-color: #e9ecef;
+  border-radius: 8px;
+  height: 10px;
+  width: 100%;
+  margin: 8px 0 8px; // Adiciona espaço vertical
+  overflow: hidden;
+}
+
+.progress-bar {
+  background-color: #007bff; // Cor da barra
+  height: 100%;
+  border-radius: 8px;
+  transition: width 0.5s ease-in-out;
+}
+
+.limit-available {
+  font-weight: 600;
+  color: #333;
+  margin-top: 16px !important;
+}
+
+.amounts-info {
+    display: flex;
+    justify-content: space-between;
+}
+
+// --- Estilos para o Dropdown de Faturas ---
+
+.invoices-section {
+    border-top: 1px solid #e0e0e0;
+    padding-block: 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+
+  h2 {
+    font-size: 18px;
+    margin-bottom: 12px;
+    color: #333;
+  }
+}
+
+.invoices-dropdown {
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  overflow: hidden; // Garante que o conteúdo respeite as bordas arredondadas
+
+  summary {
+    padding: 12px 16px;
+    font-weight: 600;
+    color: #444;
+    background-color: #f9f9f9;
+    cursor: pointer;
+    list-style: none; // Remove a seta padrão
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: background-color 0.2s;
+
+    &::-webkit-details-marker {
+      display: none; // Remove a seta padrão no Chrome/Safari
+    }
+
+    &:hover {
+      background-color: #f1f1f1;
+    }
+
+    // Adiciona uma seta customizada
+    &::after {
+      content: ''; // Deixe o conteúdo vazio
+      display: inline-block;
+      width: 16px;  // Defina o tamanho do seu ícone
+      height: 16px; // Defina o tamanho do seu ícone
+      background-image: url('/assets/arrow_back.svg');
+      background-size: contain;
+      background-repeat: no-repeat;
+      background-position: center;
+      transition: transform 0.3s ease-in-out;
+      transform: rotate(-180deg);
+    }
+  }
+
+  // Gira a seta quando o dropdown está aberto
+  &[open] > summary::after {
+    transform: rotate(-90deg);
+  }
+
+  .dropdown-content {
+    padding: 8px 16px 16px;
+    background-color: #fff;
+  }
+
+  .subscription-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 0;
+    border-bottom: 1px solid #f0f0f0;
+
+    &:last-child {
+      border-bottom: none; // Remove a borda do último item
+    }
+
+    p {
+      margin: 0;
+      font-size: 14px;
+
+      &:first-child {
+        color: #555; // Nome da assinatura
+      }
+      &:last-child {
+        font-weight: 600;
+        color: #333; // Preço
+      }
+    }
+  }
+}

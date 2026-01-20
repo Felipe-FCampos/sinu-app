@@ -11,6 +11,7 @@ export interface Card {
   cardBank: string;
   cardFinalNumbers: string;
   dueDate: number;
+  closeDay: number;
   limit: number;
   status: number;
 }
@@ -21,10 +22,59 @@ export interface CreateCardPayload {
   cardBank: string;
   cardFinalNumbers: string;
   dueDate: number | null;
+  closeDay: number | null;
   limit: number; // Mantido como number, pois o Angular/TS trata float/int como number
   status: number;
   totalSpent?: number; // Adicionado como opcional para consistência
 }
+
+export interface StandalonePayment {
+    id: string;
+    description: string | null;
+    title: string;
+    price: number;
+    category: string;
+    installments: number;
+    cardBank: string;
+    cardFinalNumbers: string;
+    purchaseDate: string; // <-- CAMPO ADICIONADO
+}
+
+// Payload para criar um novo pagamento avulso
+export interface CreateStandalonePaymentPayload {
+  title: string;
+  price: number;
+  category: string;
+  installments: number;
+  cardBank: string;
+  cardFinalNumbers: string;
+  purchaseDate: string; // <-- CAMPO ADICIONADO
+  description?: string | null;
+}
+
+// Representa um item dentro de uma fatura (uma parcela de um pagamento)
+export interface InvoiceItem {
+    title: string;
+    price: number;
+    originalPaymentId: string;
+    installmentNumber: number;
+    totalInstallments: number;
+}
+
+// Representa a fatura completa de um cartão em um determinado mês
+export interface Invoice {
+    id: string;                 
+    uid: string;                
+    cardFinalNumbers: string;
+    closeDate: string;          
+    dueDate: string;            
+    totalAmount: number;
+    items: InvoiceItem[];
+    status: 'open' | 'closed' | 'paid'; // Status da fatura
+}
+
+// --- FIM DAS NOVAS INTERFACES ---
+
 
 // Interface para atualizar um cartão
 export type UpdateCardPayload = Partial<CreateCardPayload>;
@@ -54,6 +104,13 @@ export class CardsService {
     });
   }
 
+  // Adiciona um novo pagamento avulso (e dispara a criação de faturas na API)
+  addStandalonePayment(payment: CreateStandalonePaymentPayload): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/payment/standalonepayment/create`, payment, {
+      headers: this.getAuthHeaders()
+    });
+  }
+
   // Adicionar novo cartão
   addCard(card: CreateCardPayload): Observable<any> { 
     return this.http.post<any>(`${this.apiUrl}/cards/create`, card, {
@@ -71,6 +128,26 @@ export class CardsService {
   // Deletar cartão
   deleteCard(id: string): Observable<any> {
     return this.http.delete(`${this.apiUrl}/cards/delete/${id}`, {
+      headers: this.getAuthHeaders()
+    });
+  }
+
+  // Buscar um cartão pelo ID
+  getCardById(id: string): Observable<Card> {
+    return this.http.get<Card>(`${this.apiUrl}/cards/${id}`, {
+      headers: this.getAuthHeaders()
+    });
+  }
+
+  getAllStandalonePayments(): Observable<StandalonePayment[]> {
+    return this.http.get<StandalonePayment[]>(`${this.apiUrl}/payment/standalonepayment/list`, {
+      headers: this.getAuthHeaders()
+    });
+  }
+
+  // Busca todas as faturas do usuário
+  getAllInvoices(): Observable<{ invoices: Invoice[] }> {
+    return this.http.get<{ invoices: Invoice[] }>(`${this.apiUrl}/invoices/list`, {
       headers: this.getAuthHeaders()
     });
   }
