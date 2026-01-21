@@ -1,12 +1,13 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input, OnInit } from '@angular/core'; // Importe o Input
+import { Component, Input, OnInit } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import { Card, Invoice, StandalonePayment } from 'src/app/services/cards.service';
 import { Subscription } from '../subscriptions/subscriptions.component';
 
 @Component({
   selector: 'app-cards-info',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, RouterLink],
   templateUrl: './cards-info.component.html',
   styleUrls: ['./cards-info.component.scss'],
 })
