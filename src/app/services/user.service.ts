@@ -15,7 +15,7 @@ export interface UserData {
 })
 
 export class UserService {
-  readonly appName: string = 'Sinu v2.2.1';
+  readonly appName: string = 'Sinu v2.2.2';
   apiUrl = environment.apiUrl;
 
   constructor(

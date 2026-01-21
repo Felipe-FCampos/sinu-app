@@ -1,12 +1,13 @@
 import { Component, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { AuthService } from 'src/app/services/auth.service';
 import { UserData, UserService } from 'src/app/services/user.service';
 import { DatePipe } from '@angular/common';
 
 @Component({
   selector: 'app-profile',
-  imports: [DatePipe],
+  standalone: true,
+  imports: [DatePipe, RouterLink],
   templateUrl: './profile.component.html',
   styleUrls: ['./profile.component.scss'],
 })

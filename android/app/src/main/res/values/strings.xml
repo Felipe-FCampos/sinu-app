@@ -4,4 +4,5 @@
     <string name="title_activity_main">Sinu</string>
     <string name="package_name">com.sinu.app</string>
     <string name="custom_url_scheme">com.sinu.app</string>
+    <string name="default_web_client_id">709181442903-cqluj5s9felt6qgg2hohd8nkc2ov6oo5.apps.googleusercontent.com</string>>
 </resources>
