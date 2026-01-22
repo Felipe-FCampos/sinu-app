@@ -145,6 +145,19 @@ export class CardsService {
     });
   }
 
+  updateStandalonePayment(paymentId: string, payload: Partial<CreateStandalonePaymentPayload>): Observable<any> {
+    return this.http.patch(`${this.apiUrl}/payment/standalonepayment/update/${paymentId}`, payload, {
+      headers: this.getAuthHeaders()
+    });
+  }
+
+  // NOVO MÉTODO DE DELETE
+  deleteStandalonePayment(paymentId: string): Observable<any> {
+    return this.http.delete(`${this.apiUrl}/payment/standalonepayment/delete/${paymentId}`, {
+      headers: this.getAuthHeaders()
+    });
+  }
+
   // Busca todas as faturas do usuário
   getAllInvoices(): Observable<{ invoices: Invoice[] }> {
     return this.http.get<{ invoices: Invoice[] }>(`${this.apiUrl}/invoices/list`, {

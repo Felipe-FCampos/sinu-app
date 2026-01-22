@@ -8,12 +8,16 @@
             <div class="dropdown-content">
                 <!-- Loop secundário para os pagamentos dentro de cada grupo -->
                 @for (sap of group.payments; track sap.id) {
-                    <div class="sap-item">
+                    <!-- ADICIONAR EVENTO DE CLIQUE AQUI -->
+                    <div class="sap-item" (click)="openUpdatePaymentForm(sap)">
                         <div class="sap-details">
                             <h3>{{ sap.title }}</h3>
                             <p>{{ sap.price / 100 | currency: 'BRL' }}</p>
                         </div>
-                        <p>Data da Compra: {{ sap.purchaseDate | date: 'dd/MM/yyyy' }}</p>
+                        <div class="sap-details">
+                            <p>{{ sap.cardBank }} - Final {{ sap.cardFinalNumbers }}</p>
+                            <p>{{ sap.purchaseDate | date: 'dd/MM/yyyy' }}</p>
+                        </div>
                     </div>
                 }
             </div>
@@ -127,12 +131,132 @@
     </section>
 }
 
+<!-- Modal de Editar Pagamento -->
+@if (showUpdatePaymentModal) {
+    <div class="div_background_modal" (click)="closeUpdatePaymentForm()"></div>
+    <section class="add-subscription-section">
+        <div class="add-subscription-header">
+            <h2>Editar Pagamento Avulso</h2>
+            <button class="close-button" (click)="closeUpdatePaymentForm()">
+                <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#2c2c2c">
+                    <path d="m256-200-56-56 224-224-224-224 56-56 224 224 224-224 56 56-224 224 224 224-56 56-224-224-224 224Z" />
+                </svg>
+            </button>
+        </div>
+
+        <form (ngSubmit)="updateStandalonePayment()">
+            <!-- O conteúdo do formulário é idêntico ao de adicionar, pois usamos o mesmo objeto 'newPayment' -->
+            <div class="name-container">
+                <label for="title">Título:</label>
+                <input id="title" [(ngModel)]="newPayment.title" name="title" required />
+            </div>
+
+            <div class="price-currency-container">
+                <div class="price-currency-group">
+                    <label for="price">Preço:</label>
+                    <input id="price" type="text" inputmode="decimal" [(ngModel)]="newPayment.price" name="price" appCurrencyMask required />
+                </div>
+                <div class="price-currency-group">
+                    <label for="installments">Parcelas:</label>
+                    <input id="installments" type="number" [(ngModel)]="newPayment.installments" name="installments" required />
+                </div>
+            </div>
+
+            <div class="name-container">
+                <label for="category">Categoria:</label>
+                <select id="category" [(ngModel)]="newPayment.category" name="category" required>
+                    @for (cat of paymentCategories; track cat.value) {
+                        <option [value]="cat.value">{{ cat.label }}</option>
+                    }
+                </select>
+            </div>
+
+            <div class="name-container">
+                <label for="purchaseDate">Data da Compra:</label>
+                <input id="purchaseDate" type="date" [(ngModel)]="newPayment.purchaseDate" name="purchaseDate" required />
+            </div>
+
+            <hr />
+
+            <div class="card-info-container" style="flex-direction: column;">
+                <div class="card-bank-container">
+                    <label for="cardSelection">Cartão:</label>
+                    <select id="cardSelection" [ngModel]="newPayment.cardFinalNumbers" (ngModelChange)="onCardSelectionChange($event)" name="cardSelection" required>
+                        <option value="" disabled>Selecione um cartão</option>
+                        @for (card of availableCards; track card.id) {
+                            <option [value]="card.cardFinalNumbers">{{ card.cardName }} ({{ card.cardBank }} - Final {{ card.cardFinalNumbers }})</option>
+                        }
+                        <option value="manual">Digitar manualmente...</option>
+                    </select>
+                </div>
+
+                @if (showManualCardInput) {
+                  <div class="price-currency-container">
+                    <div class="card-bank-container price-currency-group">
+                      <label for="manualCardBank">Banco:</label>
+                      <select id="manualCardBank" [(ngModel)]="newPayment.cardBank" name="manualCardBank">
+                        <option value="" disabled>Selecione o banco</option>
+                        @for (bank of bankList; track bank) { <option [value]="bank">{{ bank }}</option> }
+                      </select>
+                    </div>
+                    <div class="card-last-numbers-container price-currency-group">
+                      <label for="manualCardNumbers">Últimos 4 Números:</label>
+                      <input id="manualCardNumbers" [(ngModel)]="newPayment.cardFinalNumbers" name="manualCardNumbers" />
+                    </div>
+                  </div>
+                }
+            </div>
+
+            <div class="name-container">
+                <label for="description">Descrição (Opcional):</label>
+                <input id="description" [(ngModel)]="newPayment.description" name="description" />
+            </div>
+
+            <div style="display: flex; justify-content: space-between; gap: 8px;">
+                <button type="submit" [disabled]="isSubmitting">
+                    {{ isSubmitting ? 'Salvando...' : 'Salvar' }}
+                </button>
+                <button type="button" (click)="deleteStandalonePayment(editingPaymentId!)" [disabled]="isSubmitting" class="delete-button">
+                    {{ isSubmitting ? 'Apagando...' : 'Apagar' }}
+                </button>
+            </div>
+        </form>
+
+        @if (isSubmitting) {
+            <div class="loader-overlay"><div class="spinner"></div></div>
+        }
+    </section>
+}
+
+
 <!-- Modal de Sucesso -->
 @if (showSuccessModal) {
     <div class="success-modal">
         <div class="success-modal-backdrop"></div>
         <div class="success-modal-content">
             <p>Pagamento adicionado com sucesso!</p>
+            <button (click)="closeSuccessModal()">OK</button>
+        </div>
+    </div>
+}
+
+<!-- NOVO: Modal de Sucesso para Update -->
+@if (showUpdateSuccessModal) {
+    <div class="success-modal">
+        <div class="success-modal-backdrop"></div>
+        <div class="success-modal-content">
+            <p>Pagamento atualizado com sucesso!</p>
+            <button (click)="closeSuccessModal()">OK</button>
+        </div>
+    </div>
+}
+
+<!-- NOVO: Modal de Sucesso para Delete -->
+@if (showDeleteSuccessModal) {
+    <div class="success-modal">
+        <div class="success-modal-backdrop"></div>
+        <div class="success-modal-content">
+            <p>Pagamento apagado com sucesso!</p>
             <button (click)="closeSuccessModal()">OK</button>
         </div>
     </div>

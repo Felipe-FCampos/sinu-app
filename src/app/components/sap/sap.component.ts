@@ -27,6 +27,12 @@ export class SapComponent implements OnInit {
   public showSuccessModal = false;
   public showManualCardInput = false;
 
+  // --- NOVAS PROPRIEDADES ---
+  public showUpdatePaymentModal = false; // Controla o modal de edição
+  public showUpdateSuccessModal = false; // Controla o sucesso da edição
+  public showDeleteSuccessModal = false; // Controla o sucesso da exclusão
+  public editingPaymentId: string | null = null; // Guarda o ID do pagamento em edição
+
   // 1. Adicionar a lista de bancos
   public bankList = [
     'Banco do Brasil', 'Caixa Econômica', 'Itaú', 'Bradesco', 'Santander', 
@@ -103,7 +109,38 @@ export class SapComponent implements OnInit {
 
   closeAddPaymentForm() {
     this.showAddPaymentModal = false;
+    this.resetForm();
   }
+
+  // --- NOVOS MÉTODOS PARA O MODAL DE EDIÇÃO ---
+  openUpdatePaymentForm(payment: StandalonePayment) {
+    this.editingPaymentId = payment.id;
+    // Converte o preço de centavos para o formato do input e a data para o formato YYYY-MM-DD
+    this.newPayment = {
+      ...payment,
+      price: payment.price / 100,
+      purchaseDate: new Date(payment.purchaseDate).toISOString().split('T')[0]
+    };
+
+    // Lógica para mostrar campos manuais se o cartão não estiver salvo
+    const cardExists = this.availableCards.some(c => c.cardFinalNumbers === payment.cardFinalNumbers);
+    if (!cardExists) {
+      this.showManualCardInput = true;
+    } else {
+      this.showManualCardInput = false;
+    }
+
+    this.showUpdatePaymentModal = true;
+  }
+
+  closeUpdatePaymentForm() {
+    this.showUpdatePaymentModal = false;
+    this.editingPaymentId = null;
+    this.isSubmitting = false;
+    this.resetForm();
+  }
+
+  // --- FIM DOS NOVOS MÉTODOS ---
 
   addStandalonePayment() {
     if (!this.newPayment.cardFinalNumbers) {
@@ -133,8 +170,57 @@ export class SapComponent implements OnInit {
     });
   }
 
+  // --- NOVO MÉTODO: updateStandalonePayment ---
+  updateStandalonePayment() {
+    if (!this.editingPaymentId) return;
+
+    this.isSubmitting = true;
+
+    // O payload já está em this.newPayment
+    this.sapService.updateStandalonePayment(this.editingPaymentId, this.newPayment).subscribe({
+      next: () => {
+        this.isSubmitting = false;
+        this.closeUpdatePaymentForm();
+        this.showUpdateSuccessModal = true;
+        this.loadInitialData(); // Recarrega a lista
+      },
+      error: (err) => {
+        console.error('Erro ao atualizar pagamento:', err);
+        this.isSubmitting = false;
+        alert('Falha ao atualizar pagamento.');
+      }
+    });
+  }
+
+  // --- NOVO MÉTODO: deleteStandalonePayment ---
+  deleteStandalonePayment(paymentId: string) {
+    if (!paymentId) return;
+
+    const paymentToDelete = this.standAlonePayments.find(p => p.id === paymentId);
+    const paymentTitle = paymentToDelete ? paymentToDelete.title : 'este pagamento';
+
+    if (confirm(`Tem certeza que deseja apagar "${paymentTitle}"?`)) {
+      this.isSubmitting = true;
+      this.sapService.deleteStandalonePayment(paymentId).subscribe({
+        next: () => {
+          this.isSubmitting = false;
+          this.closeUpdatePaymentForm();
+          this.showDeleteSuccessModal = true;
+          this.loadInitialData(); // Recarrega a lista
+        },
+        error: (err) => {
+          console.error('Erro ao apagar pagamento:', err);
+          this.isSubmitting = false;
+          alert('Falha ao apagar pagamento.');
+        }
+      });
+    }
+  }
+
   closeSuccessModal() {
     this.showSuccessModal = false;
+    this.showUpdateSuccessModal = false; // Também reseta os novos modais
+    this.showDeleteSuccessModal = false; // Também reseta os novos modais
   }
 
   private resetForm() {
