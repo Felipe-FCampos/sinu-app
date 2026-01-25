@@ -1,17 +1,27 @@
 import { Component, OnInit } from '@angular/core';
 import { Subscription, SubscriptionStatus } from '../subscriptions/subscriptions.component';
 import { SubscriptionsService } from 'src/app/services/subscriptions.service';
-import { DatePipe, CurrencyPipe, KeyValuePipe } from '@angular/common';
+import { Card, CardsService, StandalonePayment } from 'src/app/services/cards.service'; // Importar StandalonePayment
+import { CurrencyPipe, KeyValuePipe } from '@angular/common';
 import localePt from '@angular/common/locales/pt';
 import localeDe from '@angular/common/locales/de';
 import { registerLocaleData } from '@angular/common';
+import { forkJoin, map } from 'rxjs'; // Importar map do rxjs
 
 // Registre os locales que você vai usar
 registerLocaleData(localePt, 'pt-BR');
 registerLocaleData(localeDe, 'de-DE');
 
+// Interface para unificar os itens de gasto
+interface UnifiedPaymentItem {
+  price: number;
+  currency: string;
+  cardFinalNumbers?: string | null;
+}
+
 @Component({
   selector: 'app-dashboard',
+  standalone: true, // standalone: true
   imports: [CurrencyPipe, KeyValuePipe],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.scss',
@@ -20,19 +30,21 @@ export class DashboardComponent implements OnInit {
 
   subscriptions: Subscription[] = [];
   totalCostsByCurrency: { [key: string]: number } = {};
+  totalCostsByCard: { [cardFinalNumbers: string]: { [currency: string]: number } } = {};
 
   totalSubscriptionsCount: number = 0;
   activeSubscriptionsCount: number = 0;
-  dueSubscriptionsCount: number = 0;      // Status 'À vencer'
-  expiredSubscriptionsCount: number = 0;  // Status 'Vencido'
-  disabledSubscriptionsCount: number = 0; // Status 'Desativado'
+  dueSubscriptionsCount: number = 0;
+  expiredSubscriptionsCount: number = 0;
+  disabledSubscriptionsCount: number = 0;
 
   constructor(
-    private subscriptionsService: SubscriptionsService
+    private subscriptionsService: SubscriptionsService,
+    private cardService: CardsService // Re-injetar o serviço
   ) { }
 
   ngOnInit() {
-    this.listSubscriptions();
+    this.loadAllData();
   }
 
   public getLocaleByCurrency(currencyCode: string): string {
@@ -49,54 +61,78 @@ export class DashboardComponent implements OnInit {
     }
   }
 
-  listSubscriptions() {
-    this.subscriptionsService.getAllSubscriptions().subscribe((data: any) => {
-      const arr = data as any[];
-      this.subscriptions = arr.map(sub => ({
-        ...sub,
-        price: sub.price / 100,
-        status: Number(sub.status) as SubscriptionStatus,
+  loadAllData() {
+    // Usar forkJoin para buscar assinaturas e pagamentos avulsos em paralelo
+    forkJoin({
+      subscriptions: this.subscriptionsService.getAllSubscriptions(),
+      standalonePayments: this.cardService.getAllStandalonePayments()
+    }).pipe(
+      // Adicione este 'pipe' para garantir a tipagem correta dos dados da API
+      map(({ subscriptions, standalonePayments }) => ({
+        subscriptions: subscriptions as Subscription[],
+        standalonePayments: standalonePayments as StandalonePayment[]
+      }))
+    ).subscribe(({ subscriptions, standalonePayments }) => {
+      
+      // Processa as assinaturas (contagem de status)
+      this.processSubscriptions(subscriptions);
+
+      // Cria uma lista unificada de itens de gasto
+      const unifiedPayments: UnifiedPaymentItem[] = [];
+
+      // Adiciona assinaturas ativas e a vencer à lista unificada
+      const activeSubscriptions = subscriptions
+        .filter(sub => sub.status === SubscriptionStatus.Active || sub.status === SubscriptionStatus.Expiring) // CORREÇÃO AQUI
+        .map(sub => ({
+          price: sub.price / 100,
+          currency: sub.currency,
+          cardFinalNumbers: sub.cardFinalNumbers
+        }));
+      
+      // Adiciona pagamentos avulsos à lista unificada
+      const allStandalonePayments = standalonePayments.map(p => ({
+        price: p.price / 100,
+        currency: 'BRL', // Assumindo que pagamentos avulsos são sempre BRL
+        cardFinalNumbers: p.cardFinalNumbers
       }));
 
-      if (this.subscriptions.length > 0) {
-        this.countTotal();
-      }
+      unifiedPayments.push(...activeSubscriptions, ...allStandalonePayments);
+
+      // Calcula os totais com base na lista unificada
+      this.calculateTotals(unifiedPayments);
     });
   }
 
-  countTotal() {
+  processSubscriptions(subs: Subscription[]) {
+    this.totalSubscriptionsCount = subs.length;
+    this.activeSubscriptionsCount = subs.filter(s => s.status === SubscriptionStatus.Active).length;
+    this.dueSubscriptionsCount = subs.filter(s => s.status === SubscriptionStatus.Expiring).length;
+    this.expiredSubscriptionsCount = subs.filter(s => s.status === SubscriptionStatus.Expired).length;
+    this.disabledSubscriptionsCount = subs.filter(s => s.status === SubscriptionStatus.Disabled).length;
+  }
+
+  calculateTotals(payments: UnifiedPaymentItem[]) {
+    // Reseta os totais
     this.totalCostsByCurrency = {};
-    this.totalSubscriptionsCount = 0;
-    this.activeSubscriptionsCount = 0;
-    this.dueSubscriptionsCount = 0;
-    this.expiredSubscriptionsCount = 0;
-    this.disabledSubscriptionsCount = 0;
+    this.totalCostsByCard = {};
 
-    this.subscriptions.forEach(sub => {
-      switch (sub.status) {
-        case SubscriptionStatus.Active:
-          this.activeSubscriptionsCount++;
-          break;
-        case SubscriptionStatus.Expiring:
-          this.dueSubscriptionsCount++;
-          break;
-        case SubscriptionStatus.Expired:
-          this.expiredSubscriptionsCount++;
-          break;
-        case SubscriptionStatus.Disabled:
-          this.disabledSubscriptionsCount++;
-          break;
+    payments.forEach(item => {
+      // Calcula o total por moeda
+      if (!this.totalCostsByCurrency[item.currency]) {
+        this.totalCostsByCurrency[item.currency] = 0;
       }
+      this.totalCostsByCurrency[item.currency] += item.price;
 
-      // Adiciona ao custo total se estiver ativa ou a vencer
-      if (sub.status === SubscriptionStatus.Active || sub.status === SubscriptionStatus.Expiring) {
-        if (!this.totalCostsByCurrency[sub.currency]) {
-          this.totalCostsByCurrency[sub.currency] = 0;
+      // Calcula o total por cartão
+      if (item.cardFinalNumbers) {
+        if (!this.totalCostsByCard[item.cardFinalNumbers]) {
+          this.totalCostsByCard[item.cardFinalNumbers] = {};
         }
-        this.totalCostsByCurrency[sub.currency] += sub.price;
+        if (!this.totalCostsByCard[item.cardFinalNumbers][item.currency]) {
+          this.totalCostsByCard[item.cardFinalNumbers][item.currency] = 0;
+        }
+        this.totalCostsByCard[item.cardFinalNumbers][item.currency] += item.price;
       }
-
-      this.totalSubscriptionsCount++;
     });
   }
 }
