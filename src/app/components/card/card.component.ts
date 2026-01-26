@@ -6,6 +6,7 @@ import localeDe from '@angular/common/locales/de';
 import { FormsModule } from '@angular/forms';
 import { CurrencyMaskDirective } from '../../currency-mask.directive';
 import { RouterLink } from '@angular/router';
+import { FilterComponent } from '../filter/filter.component'; // 1. Importar o FilterComponent
 
 registerLocaleData(localePt, 'pt-BR');
 registerLocaleData(localeDe, 'de-DE');
@@ -13,13 +14,22 @@ registerLocaleData(localeDe, 'de-DE');
 @Component({
   selector: 'app-card',
   standalone: true,
-  imports: [CommonModule, FormsModule, CurrencyMaskDirective, RouterLink],
+  imports: [CommonModule, FormsModule, CurrencyMaskDirective, RouterLink, FilterComponent], // 2. Adicionar aos imports
   templateUrl: './card.component.html',
   styleUrls: ['./card.component.scss'],
 })
 export class CardComponent implements OnInit {
+  public isLoading = true; // 1. Adicionar flag
   cards: Card[] = [];
+  allCards: Card[] = [];
   editingCardId: string | null = null;
+
+  // --- 1. Crie as opções de status e o array para filtros ativos ---
+  public statusFilterOptions = [
+    { label: 'Ativo', value: 1 },
+    { label: 'Desativado', value: 0 }
+  ];
+  private activeStatusFilters: number[] = [];
 
   // Estados de UI
   isSubmitting = false;
@@ -48,8 +58,9 @@ export class CardComponent implements OnInit {
 
   constructor(private cardsService: CardsService) { }
 
-  ngOnInit() {
+  ngOnInit(): void {
     this.listCards();
+    this.days = Array.from({ length: 31 }, (_, i) => i + 1);
   }
 
   resetNewCard() {
@@ -118,15 +129,40 @@ export class CardComponent implements OnInit {
 
   // --- Funções CRUD ---
   listCards() {
-    this.cardsService.getAllCards().subscribe({
-      next: (response) => {
-        this.cards = response.cards.map((card) => ({
-          ...card,
-          status: Number(card.status),
-        }));
-      },
-      error: (err) => console.error('Failed to load cards:', err),
+    this.isLoading = true; // 2. Ativar loading
+    this.cardsService.getAllCards().subscribe((response: { cards: Card[] }) => {
+      this.allCards = response.cards;
+      this.cards = [...this.allCards];
+      this.applyFilters();
+      this.isLoading = false; // 3. Desativar loading
     });
+  }
+
+  // --- 2. Crie os métodos para aplicar e receber os filtros ---
+  applyFilters() {
+    let filteredCards = [...this.allCards];
+
+    if (this.activeStatusFilters.length > 0) {
+      filteredCards = filteredCards.filter(card => 
+        this.activeStatusFilters.includes(card.status)
+      );
+    }
+    this.cards = filteredCards;
+  }
+
+  onStatusFilterChange(selectedStatuses: number[]) {
+    this.activeStatusFilters = selectedStatuses;
+    this.applyFilters();
+  }
+
+  // Modifique o filterCards
+  filterCards(searchTerm: string) {
+    this.applyFilters(); // Aplica o filtro de status primeiro
+    if (searchTerm) {
+      this.cards = this.cards.filter(card =>
+        card.cardName.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
   }
 
   addCard() {

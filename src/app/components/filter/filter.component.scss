@@ -1,0 +1,86 @@
+.filter-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: #2c2c2c;
+    margin-bottom: 8px;
+}
+
+.filter-container {
+    width: 100%;
+    display: flex;
+    gap: 8px;
+}
+
+.filter-container input {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.filter-button {
+    background-color: #2c2c2c;
+    border: none;
+    border-radius: 6px;
+    padding: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#div-filters {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 8px;
+}
+
+.filter-section {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    background-color: #fff;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    padding: 8px 14px;
+
+    & p {
+        font-size: 14px;
+        font-weight: 600;
+        color: #2c2c2c;
+    }
+
+    & div {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+
+        & label {
+            border: 1px solid #ccc;
+            border-radius: 12px;
+            padding: 4px 10px;
+            cursor: pointer; // Adiciona o cursor de ponteiro para indicar que é clicável
+            transition: all 0.2s ease-in-out; // Para uma transição suave
+
+            & input {
+                // Esconde o checkbox original
+                display: none;
+            }
+        }
+    }
+}
+
+// Estilo para o label quando o input está checado
+.filter-section div label:has(input:checked) {
+    background-color: #2c2c2c;
+    border-color: #2c2c2c;
+    color: #fff;    
+}
+
+.divider {
+    border: none;
+    border-top: 1px solid #acacac;
+    margin-top: 20px;
+}

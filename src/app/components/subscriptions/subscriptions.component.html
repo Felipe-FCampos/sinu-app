@@ -1,61 +1,80 @@
 <section class="subscriptions-section">
-  @if (subscriptions && subscriptions.length > 0) {
-  @for (subscription of subscriptions; track subscription.id) {
-  <div class="subscriptionCard" (click)="openUpdateSubscriptionForm(subscription)">
-    <div class="subscription-header">
-      <div class="subscription-name-status">
-        <p class="status" [ngClass]="'status-' + subscription.status">
-          <span class="dot"></span>
-          {{ getStatusLabel(subscription.status) }}
-        </p>
-        <h2>{{ subscription.name }}</h2>
-      </div>
-      <p class="subscription-price">
-        {{ subscription.price / 100
-        | currency: subscription.currency : 'symbol' : undefined : getLocaleByCurrency(subscription.currency) }}
-      </p>
-    </div>
-
-    <div class="subscription-details">
-      @if (subscription.cardBank) {
-      <div class="payment-info">
-        <p>{{ subscription.cardBank }}</p>
-        <p>Cartão de final: {{ subscription.cardFinalNumbers }}</p>
-      </div>
-      }
-      <p class="billing-date">Dia de Vencimento: {{ subscription.billingDay }}</p>
-    </div>
-
-    @if (subscription.status === 3) {
-    <div class="subscription-footer-payment" (click)="paySubscription(subscription); $event.stopPropagation()">
-      Pagar cobrança
-    </div>
-    } @else {
-    <div class="subscription-footer">
-      <p class="next-date">Próxima cobrança:</p>
-      <p class="next-date">
-        {{ subscription.nextPayment | date:'dd/MM' }}
-      </p>
-    </div>
-    }
+  
+  <div class="subscriptions-header">
+    <app-filter 
+        (searchChange)="filterSubscriptions($event)"
+        [statusOptions]="statusFilterOptions"
+        (statusChange)="onStatusFilterChange($event)"
+        [showSortButton]="true"
+        [isSorted]="isSortedByNextPayment"
+        (sortChange)="toggleSortByNextPayment()">
+    </app-filter>
   </div>
-  }
+
+  @if (isLoading) {
+       <div class="loading-container" style="display: flex; justify-content: center; align-items: center; flex-direction: column; margin-top: 24px;">
+      <div class="spinner"></div>
+      <p>Carregando assinaturas...</p>
+    </div>
   } @else {
-  <div class="no-subscriptions-message">
-    <span style="margin-bottom: 32px;">
-      <svg xmlns="http://www.w3.org/2000/svg" height="64px" viewBox="0 -960 960 960" width="64px" fill="#2c2c2c">
-        <path
-          d="M828.33-36.67 776-89q-10.67 4.33-21.5 6.67Q743.67-80 732.11-80H228q-45.83 0-77.92-32.08Q118-144.17 118-190v-123.33h124.67v-309L26.33-838.67 74-886.33l802 802-47.67 47.66Zm-601-110h491l-100-100H184.67V-190q0 18.42 12.5 30.88 12.5 12.45 30.16 12.45ZM842-213l-66.67-66.67v-493.66H281.67l-39-39V-880l59.86 60 59.87-60 59.87 60 59.86-60L542-820l60-60 60 60 60-60 60 60 60-60v667ZM309.33-313.33h242.34L309.33-555.67v242.34ZM441-614.67l-66.67-66.66H598v66.66H441Zm129.33 129.34L503.67-552H598v66.67h-27.67Zm116.22-3.34q-14.22 0-23.72-9.61-9.5-9.62-9.5-23.84 0-14.21 9.62-23.71t23.83-9.5q14.22 0 23.72 9.61 9.5 9.62 9.5 23.84 0 14.21-9.62 23.71-9.61 9.5-23.83 9.5Zm.12-126q-13.67 0-23.5-9.83-9.84-9.83-9.84-23.5t9.84-23.5q9.83-9.83 23.5-9.83 13.66 0 23.5 9.83Q720-661.67 720-648t-9.83 23.5q-9.84 9.83-23.5 9.83Zm-502 468v-100 100Z" />
-      </svg>
-    </span>
-    <p>Você ainda não possui assinaturas.</p>
-    <p>Clique no botão '+' para adicionar a sua primeira!</p>
-  </div>
+    @if (subscriptions && subscriptions.length > 0) {
+      @for (subscription of subscriptions; track subscription.id) {
+        <div class="subscriptionCard" (click)="openUpdateSubscriptionForm(subscription)">
+          <div class="subscription-header">
+            <div class="subscription-name-status">
+              <p class="status" [ngClass]="'status-' + subscription.status">
+                <span class="dot"></span>
+                {{ getStatusLabel(subscription.status) }}
+              </p>
+              <h2>{{ subscription.name }}</h2>
+            </div>
+            <p class="subscription-price">
+              {{ subscription.price / 100
+              | currency: subscription.currency : 'symbol' : undefined : getLocaleByCurrency(subscription.currency) }}
+            </p>
+          </div>
+      
+          <div class="subscription-details">
+            @if (subscription.cardBank) {
+            <div class="payment-info">
+              <p>{{ subscription.cardBank }}</p>
+              <p>Cartão de final: {{ subscription.cardFinalNumbers }}</p>
+            </div>
+            }
+            <p class="billing-date">Dia de Vencimento: {{ subscription.billingDay }}</p>
+          </div>
+      
+          @if (subscription.status === 3) {
+          <div class="subscription-footer-payment" (click)="paySubscription(subscription); $event.stopPropagation()">
+            Pagar cobrança
+          </div>
+          } @else {
+          <div class="subscription-footer">
+            <p class="next-date">Próxima cobrança:</p>
+            <p class="next-date">
+              {{ subscription.nextPayment | date:'dd/MM' }}
+            </p>
+          </div>
+          }
+        </div>
+      }
+    } @else {
+      <div class="no-subscriptions-message">
+        <span style="margin-bottom: 32px;">
+          <svg xmlns="http://www.w3.org/2000/svg" height="64px" viewBox="0 -960 960 960" width="64px" fill="#2c2c2c">
+            <path
+              d="M828.33-36.67 776-89q-10.67 4.33-21.5 6.67Q743.67-80 732.11-80H228q-45.83 0-77.92-32.08Q118-144.17 118-190v-123.33h124.67v-309L26.33-838.67 74-886.33l802 802-47.67 47.66Zm-601-110h491l-100-100H184.67V-190q0 18.42 12.5 30.88 12.5 12.45 30.16 12.45ZM842-213l-66.67-66.67v-493.66H281.67l-39-39V-880l59.86 60 59.87-60 59.87 60 59.86-60L542-820l60-60 60 60 60-60 60 60 60-60v667ZM309.33-313.33h242.34L309.33-555.67v242.34ZM441-614.67l-66.67-66.66H598v66.66H441Zm129.33 129.34L503.67-552H598v66.67h-27.67Zm116.22-3.34q-14.22 0-23.72-9.61-9.5-9.62-9.5-23.84 0-14.21 9.62-23.71t23.83-9.5q14.22 0 23.72 9.61 9.5 9.62 9.5 23.84 0 14.21-9.62 23.71-9.61 9.5-23.83 9.5Zm.12-126q-13.67 0-23.5-9.83-9.84-9.83-9.84-23.5t9.84-23.5q9.83-9.83 23.5-9.83 13.66 0 23.5 9.83Q720-661.67 720-648t-9.83 23.5q-9.84 9.83-23.5 9.83Zm-502 468v-100 100Z" />
+          </svg>
+        </span>
+        <p>Você ainda não possui despesas.</p>
+        <p>Clique no botão '+' para adicionar a sua primeira!</p>
+      </div>
+    }
   }
   <button class="add-subscription-button" (click)="openAddSubscriptionForm()">+</button>
   <section style="display: none;" class="add-subscription-section">
     <div class="add-subscription-header">
-      <h2>Adicionar Nova Assinatura</h2>
+      <h2>Adicionar Nova Despesa</h2>
       <button class="close-button" (click)="closeAddSubscriptionForm()">
         <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#2c2c2c">
           <path d="m256-200-56-56 224-224-224-224 56-56 224 224 224-224 56 56-224 224 224 224-56 56-224-224-224 224Z" />
@@ -90,7 +109,6 @@
       <div class="subscription-type-container">
         <label for="subscriptionType">Tipo de gasto:</label>
         <select id="subscriptionType" [(ngModel)]="newSubscription.subscriptionType" name="subscriptionType" required>
-          <!-- SUBSTITUA AS OPÇÕES ESTÁTICAS POR ESTE BLOCO @for -->
           @for (type of subscriptionTypes; track type.value) {
             <option [value]="type.value">{{ type.label }}</option>
           }
@@ -129,11 +147,9 @@
         </select>
       </div>
 
-      <!-- Adicione a mesma condição @if aqui -->
       @if (newSubscription.paymentMethod === 'CREDIT_CARD' || newSubscription.paymentMethod === 'DEBIT_CARD') {
         <div class="card-info-container" style="flex-direction: column;">
           
-          <!-- Dropdown de seleção de cartão -->
           <div class="card-bank-container">
             <label for="cardSelection">Cartão:</label>
             <select id="cardSelection" 
@@ -148,7 +164,6 @@
             </select>
           </div>
   
-          <!-- Campos para inserção manual (condicional) -->
           @if (showManualCardInput) {
             <div class="price-currency-container">
               <div class="card-bank-container price-currency-group">
@@ -184,7 +199,6 @@
   <div style="display: none;" class="div_background_modal"></div>
 
 
-  <!-- Update subscription form -->
   <section style="display: none;" class="update-subscription-section">
     <div class="update-subscription-header">
       <h2>Editar Assinatura</h2>
@@ -222,7 +236,6 @@
       <div class="subscription-type-container">
         <label for="subscriptionType">Tipo de gasto:</label>
         <select id="subscriptionType" [(ngModel)]="newSubscription.subscriptionType" name="subscriptionType" required>
-          <!-- SUBSTITUA AS OPÇÕES ESTÁTICAS POR ESTE BLOCO @for -->
           @for (type of subscriptionTypes; track type.value) {
             <option [value]="type.value">{{ type.label }}</option>
           }
@@ -313,7 +326,6 @@
 </div>
 }
 
-<!-- Modal de Sucesso para Alteração -->
 @if (showUpdateSuccess) {
 <div class="success-modal">
   <div class="success-modal-backdrop"></div>
@@ -324,7 +336,6 @@
 </div>
 }
 
-<!-- Modal de Sucesso para Exclusão -->
 @if (showDeleteSuccess) {
 <div class="success-modal">
   <div class="success-modal-backdrop"></div>
@@ -335,7 +346,6 @@
 </div>
 }
 
-<!-- Modal de Sucesso para Pagamento -->
 @if (showPaymentSuccess) {
 <div class="success-modal">
   <div class="success-modal-backdrop"></div>

@@ -3,6 +3,7 @@ import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Card, CardsService, CreateStandalonePaymentPayload, StandalonePayment } from 'src/app/services/cards.service';
 import { CurrencyMaskDirective } from '../../currency-mask.directive';
+import { FilterComponent } from '../filter/filter.component';
 
 // Nova interface para a estrutura agrupada
 export interface GroupedPayments {
@@ -13,13 +14,16 @@ export interface GroupedPayments {
 @Component({
   selector: 'app-sap',
   standalone: true,
-  imports: [CommonModule, FormsModule, CurrencyMaskDirective],
+  imports: [CommonModule, FormsModule, CurrencyMaskDirective, FilterComponent], // 2. Adicionar aos imports
   templateUrl: './sap.component.html',
   styleUrls: ['./sap.component.scss'],
 })
 export class SapComponent implements OnInit {
-  private standAlonePayments: StandalonePayment[] = [];
-  public groupedPayments: GroupedPayments[] = [];
+  public isLoading = true;
+  allPayments: StandalonePayment[] = [];
+  // 1. Adicionar uma nova propriedade para os pagamentos filtrados
+  filteredPayments: StandalonePayment[] = []; 
+  groupedPayments: { monthYear: string, payments: StandalonePayment[] }[] = [];
   public availableCards: Card[] = [];
 
   public showAddPaymentModal = false;
@@ -66,33 +70,44 @@ export class SapComponent implements OnInit {
 
   constructor( private sapService: CardsService) {}
 
-  ngOnInit() {
+  ngOnInit(): void {
+    // 2. Renomear a chamada para o método unificado
     this.loadInitialData();
   }
 
-  loadInitialData() {
-    this.listStandAlonePayments();
-    this.loadAvailableCards();
+  // 3. Criar um método unificado para carregar todos os dados iniciais
+  loadInitialData(): void {
+    this.isLoading = true;
+    // Usar forkJoin para carregar dados em paralelo seria uma otimização futura
+    this.sapService.getAllStandalonePayments().subscribe(payments => {
+      this.allPayments = payments;
+      this.loadAvailableCards(); // Carrega os cartões depois que os pagamentos chegam
+      this.filterPayments(''); // Inicializa com a lista completa
+      this.isLoading = false;
+    });
   }
 
-  listStandAlonePayments() {
-    this.sapService.getAllStandalonePayments().subscribe({
-      next: (response) => {
-        this.standAlonePayments = response;
-        this.groupPaymentsByMonth();
-      },
-      error: (err) => {
-        console.error('Erro ao buscar pagamentos avulsos:', err);
-        this.standAlonePayments = [];
-        this.groupedPayments = [];
-      }
-    });
+  // 4. Remover o método antigo e a chamada duplicada no ngOnInit
+  // listStandalonePayments(): void { ... } foi removido
+
+  // 5. Corrigir o método de filtro para usar as variáveis corretas
+  filterPayments(searchTerm: string) {
+    const term = searchTerm.toLowerCase();
+    if (!term) {
+      this.filteredPayments = [...this.allPayments];
+    } else {
+      this.filteredPayments = this.allPayments.filter(payment =>
+        payment.title.toLowerCase().includes(term)
+      );
+    }
+    // Após filtrar, reagrupa os pagamentos
+    this.groupPaymentsByMonth();
   }
 
   loadAvailableCards() {
     this.sapService.getAllCards().subscribe({
-      next: (response) => {
-        this.availableCards = response.cards;
+      next: (res: { cards: Card[] }) => { // API retorna { cards: Card[] }
+        this.availableCards = res.cards;
       },
       error: (err) => {
         console.error('Erro ao buscar cartões:', err);
@@ -196,7 +211,8 @@ export class SapComponent implements OnInit {
   deleteStandalonePayment(paymentId: string) {
     if (!paymentId) return;
 
-    const paymentToDelete = this.standAlonePayments.find(p => p.id === paymentId);
+    // 7. Corrigir a busca do pagamento a ser deletado
+    const paymentToDelete = this.allPayments.find(p => p.id === paymentId);
     const paymentTitle = paymentToDelete ? paymentToDelete.title : 'este pagamento';
 
     if (confirm(`Tem certeza que deseja apagar "${paymentTitle}"?`)) {
@@ -239,8 +255,10 @@ export class SapComponent implements OnInit {
   private groupPaymentsByMonth() {
     const groups = new Map<string, StandalonePayment[]>();
 
-    for (const payment of this.standAlonePayments) {
+    // 8. Usar a lista filtrada (filteredPayments) em vez de uma variável inexistente
+    for (const payment of this.filteredPayments) {
       const date = new Date(payment.purchaseDate);
+      // Adiciona 1 ao mês, pois getMonth() é baseado em zero (0-11)
       const monthYearKey = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}`;
 
       if (!groups.has(monthYearKey)) {

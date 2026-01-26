@@ -1,48 +1,65 @@
 <section class="cards-container">
-  @if (cards.length > 0) {
-  @for (card of cards; track card.id) {
-  <div class="card-item" (click)="openUpdateCardForm(card)">
-    <div class="card-header">
-      <h3>{{ card.cardName }}</h3>
-      <span>Final {{ card.cardFinalNumbers }}</span>
-    </div>
-    <div class="card-body">
-      <div class="card-details">
-        <div class="bank-info">
-          <p>Banco: {{ card.cardBank }}</p>
-          <p>Dia de vencimento: {{ card.dueDate }}</p>
-        </div>
-        <div class="spending-info">
-          <span>
-            <p>Gasto:</p>
-            <p>{{ card.totalSpent / 100 | currency: ('BRL') : 'symbol' : undefined : getLocaleByCurrency('BRL')}}</p>
-          </span>
-          <span>
-            <p>Limite:</p>
-            <p>{{ card.limit / 100 | currency: ('BRL') : 'symbol' : undefined : getLocaleByCurrency('BRL') }}</p>
-          </span>
-        </div>
-      </div>
-
-      <!-- Barra de Progresso -->
-      <div class="progress-bar-container">
-        <div class="progress-bar" [style.width.%]="(card.totalSpent / card.limit) * 100"></div>
-      </div>
-
-      <p class="limit-available">
-        <span>Disponível:</span>
-        <span>{{ (card.limit - card.totalSpent) / 100 | currency: ('BRL') : 'symbol' : undefined :
-          getLocaleByCurrency('BRL')}}</span>
-      </p>
-      <a [routerLink]="['/card', card.id ]" class="access-invoices-button">Acessar faturas</a>
-    </div>
+  <div class="subscriptions-header">
+    <app-filter 
+        (searchChange)="filterCards($event)"
+        [statusOptions]="statusFilterOptions"
+        (statusChange)="onStatusFilterChange($event)">
+    </app-filter>
   </div>
-  }
-  } @else {
-    <div class="no-cards-message">
-      <p>Nenhum cartão encontrado.</p>
-      <p>Clique no botão '+' para adicionar seu primeiro cartão!</p>
+
+  <!-- Adicionar bloco de carregamento -->
+  @if (isLoading) {
+    <div class="loading-container" style="display: flex; justify-content: center; align-items: center; flex-direction: column; margin-top: 24px;">
+      <div class="spinner"></div>
+      <p>Carregando cartões...</p>
     </div>
+  } @else {
+    <!-- Conteúdo existente movido para o @else -->
+    @if (cards.length > 0) {
+      @for (card of cards; track card.id) {
+        <div class="card-item" (click)="openUpdateCardForm(card)">
+          <div class="card-header">
+            <h3>{{ card.cardName }}</h3>
+            <span>Final {{ card.cardFinalNumbers }}</span>
+          </div>
+          <div class="card-body">
+            <div class="card-details">
+              <div class="bank-info">
+                <p>Banco: {{ card.cardBank }}</p>
+                <p>Dia de vencimento: {{ card.dueDate }}</p>
+              </div>
+              <div class="spending-info">
+                <span>
+                  <p>Gasto:</p>
+                  <p>{{ card.totalSpent / 100 | currency: ('BRL') : 'symbol' : undefined : getLocaleByCurrency('BRL')}}</p>
+                </span>
+                <span>
+                  <p>Limite:</p>
+                  <p>{{ card.limit / 100 | currency: ('BRL') : 'symbol' : undefined : getLocaleByCurrency('BRL') }}</p>
+                </span>
+              </div>
+            </div>
+
+            <!-- Barra de Progresso -->
+            <div class="progress-bar-container">
+              <div class="progress-bar" [style.width.%]="(card.totalSpent / card.limit) * 100"></div>
+            </div>
+
+            <p class="limit-available">
+              <span>Disponível:</span>
+              <span>{{ (card.limit - card.totalSpent) / 100 | currency: ('BRL') : 'symbol' : undefined :
+                getLocaleByCurrency('BRL')}}</span>
+            </p>
+            <a [routerLink]="['/card', card.id ]" class="access-invoices-button">Acessar faturas</a>
+          </div>
+        </div>
+      }
+    } @else {
+      <div class="no-cards-message">
+        <p>Nenhum cartão encontrado.</p>
+        <p>Clique no botão '+' para adicionar seu primeiro cartão!</p>
+      </div>
+    }
   }
   <button class="add-card-button" (click)="openAddCardForm()">+</button>
 </section>

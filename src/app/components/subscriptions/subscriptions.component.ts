@@ -2,11 +2,12 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule, registerLocaleData, } from '@angular/common';
 import { Timestamp } from '@angular/fire/firestore';
 import localePt from '@angular/common/locales/pt';
-import localeDe from '@angular/common/locales/de'; // Exemplo se você mapear 'EUR' para 'de-DE'
+import localeDe from '@angular/common/locales/de';
 import { CreateSubscriptionPayload, SubscriptionsService } from 'src/app/services/subscriptions.service';
 import { FormsModule } from '@angular/forms';
-import { CurrencyMaskDirective } from '../../currency-mask.directive'; // 1. Importe a diretiva
-import { Card, CardsService } from 'src/app/services/cards.service'; // 1. Importar Card e CardsService
+import { CurrencyMaskDirective } from '../../currency-mask.directive';
+import { Card, CardsService } from 'src/app/services/cards.service';
+import { FilterComponent } from '../filter/filter.component';
 
 registerLocaleData(localePt, 'pt-BR');
 registerLocaleData(localeDe, 'de-DE');
@@ -41,7 +42,8 @@ export interface Subscription {
   imports: [
     CommonModule,
     FormsModule,
-    CurrencyMaskDirective
+    CurrencyMaskDirective,
+    FilterComponent
   ],
   templateUrl: './subscriptions.component.html',
   styleUrls: ['./subscriptions.component.scss']
@@ -49,16 +51,27 @@ export interface Subscription {
 export class SubscriptionsComponent implements OnInit {
   constructor(
     private subscriptionsService: SubscriptionsService,
-    private cardsService: CardsService // 4. Injetar o CardsService
+    private cardsService: CardsService
   ) { }
+
+  public isLoading = true;
 
   editingSubscriptionId: string | null = null;
 
   subscriptions: Subscription[] = [];
+  private allSubscriptions: Subscription[] = [];
 
   isUpdateMode: boolean = false;
+  isSortedByNextPayment = false;
 
-  // ADICIONE ESTA PROPRIEDADE
+  public statusFilterOptions = [
+    { label: 'Ativo', value: SubscriptionStatus.Active },
+    { label: 'À vencer', value: SubscriptionStatus.Expiring },
+    { label: 'Vencido', value: SubscriptionStatus.Expired },
+    { label: 'Desativado', value: SubscriptionStatus.Disabled }
+  ];
+  private activeStatusFilters: SubscriptionStatus[] = [];
+
   public subscriptionTypes = [
     { value: 'STREAMING', label: 'Streaming' },
     { value: 'SOFTWARE', label: 'Software' },
@@ -72,13 +85,13 @@ export class SubscriptionsComponent implements OnInit {
     { value: 'OTHER', label: 'Outros' }
   ];
 
-  isSubmitting = false;   // loader
-  showSuccess = false;    // modal de sucesso para ADIÇÃO
-  showUpdateSuccess = false; // modal de sucesso para ATUALIZAÇÃO
-  showDeleteSuccess = false; // modal de sucesso para EXCLUSÃO
-  showPaymentSuccess = false; // modal para pagamento
+  isSubmitting = false;
+  showSuccess = false;
+  showUpdateSuccess = false;
+  showDeleteSuccess = false;
+  showPaymentSuccess = false;
 
-  days: number[] = Array.from({ length: 30 }, (_, i) => i + 1); // Gera os dias de 1 a 30
+  days: number[] = Array.from({ length: 30 }, (_, i) => i + 1);
 
   newSubscription: CreateSubscriptionPayload = {
     name: '',
@@ -97,7 +110,6 @@ export class SubscriptionsComponent implements OnInit {
   public availableCards: Card[] = [];
   public showManualCardInput = false;
 
-  // 1. Adicionar a lista de bancos
   public bankList = [
     'Banco do Brasil', 'Caixa Econômica', 'Itaú', 'Bradesco', 'Santander', 
     'Banco Inter', 'PicPay', 'Nubank', 'C6 Bank', 'Outro'
@@ -134,13 +146,12 @@ export class SubscriptionsComponent implements OnInit {
     switch (currencyCode) {
       case 'BRL':
         return 'pt-BR';
-      case 'EUR': // Geralmente Europa usa vírgula decimal
+      case 'EUR':
         return 'de-DE';
       case 'USD':
       case 'AUD':
-        return 'en-US'; // Geralmente padrão anglófono (ponto decimal)
+        return 'en-US';
       default:
-        // Padrão de segurança: use o localizador do seu país ou o padrão internacional
         return 'en-US';
     }
   }
@@ -159,8 +170,6 @@ export class SubscriptionsComponent implements OnInit {
     }
   }
 
-  // Open and close subscription form for adding a new subscription
-
   openAddSubscriptionForm() {
     const forms = document.querySelector('.add-subscription-section') as HTMLElement;
     const div = document.querySelector('.div_background_modal') as HTMLElement;
@@ -177,8 +186,6 @@ export class SubscriptionsComponent implements OnInit {
     this.isSubmitting = false;
     this.resetNewSubscription();
   }
-
-  // Open and close subscription form for updating a new subscription
 
   openUpdateSubscriptionForm(subscription: Subscription) {
     this.editingSubscriptionId = subscription.id;
@@ -209,16 +216,11 @@ export class SubscriptionsComponent implements OnInit {
   }
 
   calculateNextPayment(createdDate: Date, billingDay: number, billingFrequency: string): Date {
-    // Cria uma cópia da data de criação para não modificar a original
     const paymentDate = new Date(createdDate);
 
-    // Define o dia do mês para o dia de cobrança escolhido
     paymentDate.setDate(billingDay);
 
-    // Se a data de pagamento calculada (neste mês) já passou ou é hoje,
-    // precisamos avançar para o próximo ciclo de cobrança.
     if (paymentDate <= createdDate) {
-      // Avança para o próximo ciclo baseado na frequência
       switch (billingFrequency) {
         case 'MONTHLY':
           paymentDate.setMonth(paymentDate.getMonth() + 1);
@@ -233,28 +235,65 @@ export class SubscriptionsComponent implements OnInit {
           paymentDate.setFullYear(paymentDate.getFullYear() + 1);
           break;
         default:
-          // Como padrão, avança um mês se a frequência for desconhecida
           paymentDate.setMonth(paymentDate.getMonth() + 1);
           break;
       }
     }
-    // Se a data de pagamento (paymentDate) for futura, não fazemos nada,
-    // pois ela já é a data correta da próxima cobrança.
 
     return paymentDate;
   }
 
-  // CRUD Functions -------------------------------------------
-
   listSubscriptions() {
+    this.isLoading = true;
     this.subscriptionsService.getAllSubscriptions().subscribe((data: any) => {
       const arr = data as any[];
-      this.subscriptions = arr.map(sub => ({
+      this.allSubscriptions = arr.map(sub => ({
         ...sub,
         status: Number(sub.status) as SubscriptionStatus,
       }));
+      this.subscriptions = [...this.allSubscriptions];
+      this.applyFilters();
       console.log('Subscriptions: ', this.subscriptions);
+      this.isLoading = false;
     });
+  }
+
+  applyFilters() {
+    let filteredSubscriptions = [...this.allSubscriptions];
+
+    if (this.activeStatusFilters.length > 0) {
+      filteredSubscriptions = filteredSubscriptions.filter(sub => 
+        this.activeStatusFilters.includes(sub.status)
+      );
+    }
+    
+    this.subscriptions = filteredSubscriptions;
+
+    if (this.isSortedByNextPayment) {
+      this.subscriptions.sort((a, b) => new Date(a.nextPayment).getTime() - new Date(b.nextPayment).getTime());
+    }
+  }
+
+  toggleSortByNextPayment() {
+    this.isSortedByNextPayment = !this.isSortedByNextPayment;
+    this.applyFilters();
+  }
+
+  onStatusFilterChange(selectedStatuses: SubscriptionStatus[]) {
+    this.activeStatusFilters = selectedStatuses;
+    this.applyFilters();
+  }
+
+  filterSubscriptions(searchTerm: string) {
+    if (!searchTerm) {
+      this.subscriptions = [...this.allSubscriptions];
+      this.applyFilters();
+    } else {
+      this.applyFilters();
+      this.subscriptions = this.subscriptions.filter(sub =>
+        sub.name.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
   }
 
   addSubscription() {
@@ -262,7 +301,6 @@ export class SubscriptionsComponent implements OnInit {
     const billingDay = this.newSubscription.billingDay;
     const billingFrequency = this.newSubscription.billingFrequency;
 
-    // Calcula a data do próximo pagamento
     if (billingDay === null) return;
 
     const nextPayment = this.calculateNextPayment(createdDate, billingDay, billingFrequency);
@@ -283,21 +321,21 @@ export class SubscriptionsComponent implements OnInit {
       cardFinalNumbers: this.newSubscription.cardFinalNumbers || null,
     }
 
-    this.isSubmitting = true;    // 👈 começa o loader
+    this.isSubmitting = true;
     this.showSuccess = false;
 
     this.subscriptionsService.addSubscription(newSubscription).subscribe({
       next: (response) => {
         console.log('Subscription added:', response);
-        this.listSubscriptions(); // Refresh the list after adding
+        this.listSubscriptions();
         this.resetNewSubscription();
-        this.isSubmitting = false;   // 👈 para loader
+        this.isSubmitting = false;
         this.showSuccess = true;
         this.closeAddSubscriptionForm();
       },
       error: (err) => {
         console.error(err);
-        this.isSubmitting = false;   // garante que não fique travado
+        this.isSubmitting = false;
       }
     });
   }
@@ -337,7 +375,6 @@ export class SubscriptionsComponent implements OnInit {
       .updateSubscription(this.editingSubscriptionId, updatePayload)
       .subscribe({
         next: (updated) => {
-          // Atualiza a lista local
           this.subscriptions = this.subscriptions.map(s =>
             s.id === updated.id ? updated : s
           );
@@ -367,21 +404,20 @@ export class SubscriptionsComponent implements OnInit {
     const confirmed = confirm(`Deseja realmente excluir "${subscriptionName}"?`);
     if (!confirmed) return;
 
-    this.isSubmitting = true; // Ativa o loader
+    this.isSubmitting = true;
 
     this.subscriptionsService.deleteSubscription(subscriptionId).subscribe({
       next: () => {
-        // Remove a assinatura da lista local para atualizar a UI
         this.subscriptions = this.subscriptions.filter(
           (s) => s.id !== subscriptionId
         );
-        this.isSubmitting = false; // Para o loader
-        this.closeUpdateSubscriptionForm(); // Fecha o modal de EDIÇÃO
-        this.showDeleteSuccess = true; // Mostra o modal de exclusão com sucesso
+        this.isSubmitting = false;
+        this.closeUpdateSubscriptionForm();
+        this.showDeleteSuccess = true;
       },
       error: (err) => {
         console.error('Erro ao deletar assinatura', err);
-        this.isSubmitting = false; // Garante que o loader pare em caso de erro
+        this.isSubmitting = false;
         alert('Ocorreu um erro ao apagar a assinatura.');
       }
     });
@@ -390,22 +426,20 @@ export class SubscriptionsComponent implements OnInit {
   paySubscription(subscription: Subscription) {
     this.subscriptionsService.paySubscription(subscription).subscribe({
       next: (response) => {
-        this.showPaymentSuccess = true; // Mostra o modal de sucesso
-        this.listSubscriptions(); // Refresh the list after payment
+        this.showPaymentSuccess = true;
+        this.listSubscriptions();
       },
       error: (err) => {
-        // Mantive o alert para o erro, mas você pode criar um modal de erro também
         alert(`Erro ao processar o pagamento: ${err.message || 'Tente novamente.'}`);
       }
     });
   }
 
-  // 7. Adicionar método para lidar com a seleção no dropdown
   onCardSelectionChange(selectedValue: string) {
     if (selectedValue === 'manual') {
       this.showManualCardInput = true;
       this.newSubscription.cardFinalNumbers = '';
-      this.newSubscription.cardBank = ''; // Limpa para nova seleção no dropdown de bancos
+      this.newSubscription.cardBank = '';
     } else {
       this.showManualCardInput = false;
       const selectedCard = this.availableCards.find(c => c.cardFinalNumbers === selectedValue);
@@ -416,7 +450,6 @@ export class SubscriptionsComponent implements OnInit {
     }
   }
 
-  // 6. Adicionar método para carregar os cartões
   loadAvailableCards() {
     this.cardsService.getAllCards().subscribe({
       next: (response) => {

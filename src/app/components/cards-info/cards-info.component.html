@@ -1,5 +1,8 @@
 @if (isLoading) {
-<p>Carregando informações do cartão...</p>
+  <div class="loading-container" style="display: flex; justify-content: center; align-items: center; flex-direction: column; height: 90vh;">
+    <div class="spinner"></div>
+    <p>Carregando informações do cartão...</p>
+  </div>
 } @else if (error) {
 <div class="error-message">
     <p>{{ error }}</p>
