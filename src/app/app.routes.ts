@@ -9,6 +9,8 @@ import { CardsComponent } from './pages/cards/cards.component';
 import { InfoCardComponent } from './pages/info-card/info-card.component';
 import { SapsComponent } from './pages/saps/saps.component';
 import { SettingsComponent } from './pages/settings/settings.component';
+import { AdvancedsettingsComponent } from './pages/advancedsettings/advancedsettings.component';
+import { SupportComponent } from './pages/support/support.component';
 
 export const routes: Routes = [
     {
@@ -30,6 +32,8 @@ export const routes: Routes = [
             { path: 'cards', component: CardsComponent },
             { path: 'card/:id', component: InfoCardComponent },
             { path: 'settings', component: SettingsComponent },
+            { path: 'advancedsettings', component: AdvancedsettingsComponent },
+            { path: 'support', component: SupportComponent },
         ],
     }
 ];

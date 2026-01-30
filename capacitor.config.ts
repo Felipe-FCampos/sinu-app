@@ -9,9 +9,12 @@ const config: CapacitorConfig = {
       skipNativeAuth: false,
       providers: ['google.com'],
     },
+    PushNotifications: {
+      presentationOptions: ["badge", "sound", "alert"],
+    },
   },
   server: {
-    url: 'https://sinuapp.com',
+    url: 'http://192.168.0.138:3000/',
     cleartext: true,
   },
 };

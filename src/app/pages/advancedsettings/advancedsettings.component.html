@@ -1,0 +1,67 @@
+<section class="settings-page">
+    <a class="back-button-profile" routerLink="/settings">
+        <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px" fill="#2c2c2c">
+            <path d="M0 0h24v24H0V0z" fill="none" opacity=".87" />
+            <path
+                d="M16.62 2.99c-.49-.49-1.28-.49-1.77 0L6.54 11.3c-.39.39-.39 1.02 0 1.41l8.31 8.31c.49.49 1.28.49 1.77 0s.49-1.28 0-1.77L9.38 12l7.25-7.25c.48-.48.48-1.28-.01-1.76z" />
+        </svg>
+        <span>Ações avançadas da conta</span>
+    </a>
+    <div class="page-header">
+        <h2>Zona de Perigo</h2>
+        <p>Aqui você pode gerenciar ações sensíveis da sua conta. Por favor, proceda com cautela.</p>
+    </div>
+    <div class="advanced-setting-item">
+        <div class="title-and-description">
+            <h3>Notificações</h3>
+            <p>Ative as notificações para receber atualizações importantes.</p>
+        </div>
+        <div>
+            <label class="switch">
+                <input type="checkbox" [checked]="isNotificationsEnabled" (change)="onToggleNotifications($event)">
+                <span class="slider"></span>
+            </label>
+        </div>
+    </div>
+    <div class="advanced-setting-item">
+        <div class="title-and-description">
+            <h3>Esqueceu a senha?</h3>
+            <p>Altere pressionando no botão ao lado.</p>
+        </div>
+        <div>
+            <button class="password-button">Alterar senha</button>
+        </div>
+    </div>
+    <div class="warning-text">
+        <p>Ações irreversíveis.</p>
+    </div>
+    <div class="advanced-setting-item delete-section">
+        <div class="title-and-description">
+            <h3>Apagar Conta</h3>
+            <p>Aperte o botão para excluir sua conta.</p>
+        </div>
+        <div>
+            <button class="delete-button">Apagar conta</button>
+        </div>
+    </div>
+        <div class="advanced-setting-item delete-section">
+        <div class="title-and-description">
+            <h3>Zerar Conta</h3>
+            <p>Aperte o botão para zerar sua conta.</p>
+        </div>
+        <div>
+            <button class="delete-button">Zerar conta</button>
+        </div>
+    </div>
+</section>
+@if (showPermissionModal) {
+<div class="modal-backdrop">
+    <div class="modal-content">
+        <svg xmlns="http://www.w3.org/2000/svg" height="40px" viewBox="0 0 24 24" width="40px" fill="#2c2c2c"><g fill="none"><path d="M0 0h24v24H0V0z"/><path d="M0 0h24v24H0V0z" opacity=".87"/></g><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zM9 8V6c0-1.66 1.34-3 3-3s3 1.34 3 3v2H9z"/></svg>
+        <h3>Permissão de Notificações</h3>
+        <p>Para sua segurança, não podemos acessar suas permissões e desativar a permissão para notificações.</p>
+        <p>Acesse as configurações do app no seu celular para parar de receber notificações.</p>
+        <button class="modal-button" (click)="closePermissionModal()">OK</button>
+    </div>
+</div>
+}
