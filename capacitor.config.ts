@@ -14,7 +14,8 @@ const config: CapacitorConfig = {
     },
   },
   server: {
-    url: 'http://192.168.0.138:3000/',
+    // url: 'http://192.168.0.138:3000/',
+    url: 'https://sinuapp.com',
     cleartext: true,
   },
 };

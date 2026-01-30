@@ -57,7 +57,7 @@ export class PushService {
     PushNotifications.addListener('registration', (token: Token) => {
       this.http
         .post(
-          `${this.apiUrlDev}/user/push-token`,
+          `${this.apiUrl}/user/push-token`,
           { token: token.value },
           {
             headers: this.getAuthHeaders()
