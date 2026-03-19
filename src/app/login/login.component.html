@@ -4,22 +4,30 @@
 <form class="form-login" (ngSubmit)="onSubmit()">
     <h1 class="login-title">Bem-vindo de volta</h1>
     <label for="email" class="form-input">
-        <input type="text" id="email" name="email" placeholder=" " [(ngModel)]="email" required>
+        <input type="text" id="email" name="email" placeholder=" " [(ngModel)]="email" [disabled]="isSubmitting"
+            required>
         <p>Digite seu e-mail</p>
     </label>
-    
+
     <label for="password" class="form-input">
-        <input type="text" id="password" name="senha" placeholder=" " [(ngModel)]="password" required>
+        <input type="password" id="password" name="senha" placeholder=" " [(ngModel)]="password"
+            [disabled]="isSubmitting" required>
         <p>Digite sua senha</p>
     </label>
 
-    <a class="forget-password">Esqueceu sua senha?</a>
+    <a class="forget-password" [class.disabled]="isSubmitting">Esqueceu sua senha?</a>
 
-    <button type="submit" class="login-button">
+    <button type="submit" class="login-button" [disabled]="isSubmitting">
+        @if (!isSubmitting) {
         Entrar
+        } @else {
+        <span class="btn-spinner"></span> <!-- (ADICIONADO POR MIM) -->
+        Entrando...
+        }
     </button>
 
-    <p class="register-prompt">Não tem uma conta? <a routerLink="/register">Cadastre-se</a></p>
+    <p class="register-prompt">Não tem uma conta? <a routerLink="/register"
+            [class.disabled]="isSubmitting">Cadastre-se</a></p>
 
     <div class="divider">
         <hr />
@@ -27,8 +35,14 @@
         <hr />
     </div>
 
-    <button type="button" class="google-button" (click)="googleLogin()">
+    <button type="button" class="google-button" (click)="googleLogin()" [disabled]="isSubmitting">
+        @if (!isSubmitting) {
         <img src="../../assets/google.png" width="32" height="32" />
         Entrar com Google
+        } @else {
+        <span class="btn-spinner"></span> <!-- (ADICIONADO POR MIM) -->
+        Conectando com Google...
+        }
+
     </button>
 </form>

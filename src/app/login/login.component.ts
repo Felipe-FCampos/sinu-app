@@ -26,6 +26,7 @@ export class LoginComponent implements OnInit {
 
   email: string = '';
   password: string = '';
+  isSubmitting = false;
 
   ngOnInit(): void {
     const menu = document.querySelector('.menu-wrapper') as HTMLElement;
@@ -35,6 +36,9 @@ export class LoginComponent implements OnInit {
   }
 
   async onSubmit() {
+    if (this.isSubmitting) return;
+    this.isSubmitting = true; 
+
     const payload = {
       email: this.email,
       password: this.password
@@ -69,13 +73,20 @@ export class LoginComponent implements OnInit {
       } else {
         const error = await response.json();
         console.error('Erro no login:', error);
+        alert(error.message || 'Erro ao fazer login');
       }
     } catch (error) {
       console.error('Erro na requisição de login:', error);
+      alert('Não foi possível conectar ao servidor'); 
+    } finally {
+      this.isSubmitting = false; 
     }
   }
 
   async googleLogin() {
+    if (this.isSubmitting) return; 
+    this.isSubmitting = true; 
+
     try {
       const { googleIdToken } = await this.authService.signInWithGoogle();
       const response = await fetch(`${this.apiUrl}/auth/google`, {

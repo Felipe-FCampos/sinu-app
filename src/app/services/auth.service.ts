@@ -22,7 +22,7 @@ export interface LoginResponse {
 export class AuthService {
   private token$ = new BehaviorSubject<string | null>(null);
   private http = inject(HttpClient);
-  private secureStore = inject(SecureTokenStore); 
+  private secureStore = inject(SecureTokenStore);
   private apiUrl = environment.apiUrl;
 
   get token(): string | null {
@@ -40,29 +40,50 @@ export class AuthService {
   async signInWithGoogle(): Promise<{ user: User; idToken: string, googleIdToken?: string }> {
     const auth = getAuth();
 
+    // 1) Login Firebase (nativo ou web)
+    let firebaseIdToken: string;
+    let user: User;
+    let googleIdToken: string | undefined;
+
     if (Capacitor.isNativePlatform()) {
-
       const res = await FirebaseAuthentication.signInWithGoogle();
-      const googleIdToken = res.credential?.idToken;
+      googleIdToken = res.credential?.idToken || undefined;
       if (!googleIdToken) throw new Error('Google idToken ausente');
-
 
       const cred = GoogleAuthProvider.credential(googleIdToken);
       const userCred = await signInWithCredential(auth, cred);
-      const firebaseIdToken = await userCred.user.getIdToken();
-
-      return { user: userCred.user, idToken: firebaseIdToken, googleIdToken };
+      user = userCred.user;
+      firebaseIdToken = await user.getIdToken();
+    } else {
+      const provider = new GoogleAuthProvider();
+      const result = await signInWithPopup(auth, provider);
+      const cred = GoogleAuthProvider.credentialFromResult(result);
+      googleIdToken = cred?.idToken || undefined;
+      user = result.user;
+      firebaseIdToken = await result.user.getIdToken();
     }
 
-    // Web
-    const provider = new GoogleAuthProvider();
-    const result = await signInWithPopup(auth, provider);
-    const cred = GoogleAuthProvider.credentialFromResult(result);
-    const googleIdToken = cred?.idToken || undefined;
-    const firebaseIdToken = await result.user.getIdToken();
+    // 2) Troca pelo token do backend
+    const session = await firstValueFrom(
+      this.http.post<LoginResponse>(
+        `${this.apiUrl}/auth/google`,
+        { googleIdToken, firebaseIdToken }, // <- nomes batendo com o backend
+        { withCredentials: true }
+      )
+    );
 
-    return { user: result.user, idToken: firebaseIdToken, googleIdToken };
+    // 3) Salva refresh no cofre (nativo)
+    if (Capacitor.isNativePlatform()) {
+      await this.secureStore.setRefresh(session.refreshToken);
+    }
+
+    // 4) Seta access token em memória
+    this.setToken(session.idToken);
+
+    // 5) Retorna user + token do backend (idToken) + googleIdToken se quiser
+    return { user, idToken: session.idToken, googleIdToken };
   }
+
 
   async signOut(): Promise<void> {
     try {
@@ -70,7 +91,7 @@ export class AuthService {
     } catch (error) {
       console.error('Falha ao fazer logout no backend, continuando com o logout local...', error);
     }
-    
+
     const auth = getAuth();
     if (Capacitor.isNativePlatform()) {
       await FirebaseAuthentication.signOut();

@@ -1,37 +1,85 @@
 <div class="div-logo">
-    <img src="../../assets/logo-veno.svg" alt="" width="96" height="96">
+  <img src="../../assets/logo-veno.svg" alt="" width="96" height="96">
 </div>
+
 <form class="form-login" (ngSubmit)="onSubmit()">
-    <h1 class="login-title">Seja bem-vindo!</h1>
-    <label for="name" class="form-input">
-        <input type="text" id="name" name="name" placeholder=" " [(ngModel)]="name" required>
-        <p>Digite seu nome</p>
-    </label>
+  <h1 class="login-title">Seja bem-vindo!</h1>
 
-    <label for="email" class="form-input">
-        <input type="text" id="email" name="email" placeholder=" " [(ngModel)]="email" required>
-        <p>Digite seu e-mail</p>
-    </label>
-    
-    <label for="password" class="form-input">
-        <input type="text" id="password" name="senha" placeholder=" " [(ngModel)]="password" required>
-        <p>Digite sua senha</p>
-    </label>
+  <label for="name" class="form-input">
+    <input
+      type="text"
+      id="name"
+      name="name"
+      placeholder=" "
+      [(ngModel)]="name"
+      [disabled]="isSubmitting"
+      required
+    >
+    <p>Digite seu nome</p>
+  </label>
 
-    <button type="submit" class="login-button">
-        Cadastrar-se
-    </button>
+  <label for="email" class="form-input">
+    <input
+      type="text"
+      id="email"
+      name="email"
+      placeholder=" "
+      [(ngModel)]="email"
+      [disabled]="isSubmitting"
+      required
+    >
+    <p>Digite seu e-mail</p>
+  </label>
+  
+  <label for="password" class="form-input">
+    <input
+      type="password"
+      id="password"
+      name="senha"
+      placeholder=" "
+      [(ngModel)]="password"
+      [disabled]="isSubmitting"
+      required
+    >
+    <p>Digite sua senha</p>
+  </label>
 
-    <p class="register-prompt">Já tem uma conta? <a routerLink="/login">Entre</a></p>
+  <button
+    type="submit"
+    class="login-button"
+    [disabled]="isSubmitting"
+  >
+    @if (!isSubmitting) {
+      Cadastrar-se
+    } @else {
+      <span class="btn-spinner"></span>
+      Cadastrando...
+    }
+  </button>
 
-    <div class="divider">
-        <hr />
-        <p>Ou acesse com</p>
-        <hr />
-    </div>
+  <p class="register-prompt">
+    Já tem uma conta?
+    <a routerLink="/login" [class.disabled]="isSubmitting">Entre</a>
+  </p>
 
-    <button class="google-button" (click)="googleLogin()">
-        <img src="../../assets/google.png" width="32" height="32" />
-        Cadastrar-se com Google
-    </button>
+  <div class="divider">
+    <hr />
+    <p>Ou acesse com</p>
+    <hr />
+  </div>
+
+  <button
+    type="button"
+    class="google-button"
+    (click)="googleLogin()"
+    [disabled]="isSubmitting"
+  >
+    @if (!isSubmitting) {
+      <img src="../../assets/google.png" width="32" height="32" />
+      Cadastrar-se com Google
+    } @else {
+      <span class="btn-spinner"></span>
+      Conectando com Google...
+    }
+  </button>
 </form>

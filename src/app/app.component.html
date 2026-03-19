@@ -1,12 +1,18 @@
 @if (isLoading) {
-<div class="loader-container">
-    <div class="loader"></div>
-</div>
+  <div class="loader-wrapper"> <!-- (ADICIONADO POR MIM) container geral -->
+    <div class="loader-container"> <!-- (JÁ EXISTIA, MANTIDO) -->
+      <div class="loader"></div>   <!-- (JÁ EXISTIA, MANTIDO) -->
+    </div>
+
+    <p class="loader-text"> <!-- (ADICIONADO POR MIM) -->
+      {{ loadingMessage }}
+    </p>
+  </div>
 } @else {
-<div class="app-container">
+  <div class="app-container">
     <router-outlet></router-outlet>
-</div>
-}
-<div class="menu-wrapper">
+  </div>
+  <div class="menu-wrapper">
     <app-menu></app-menu>
-</div>
+  </div>
+}

@@ -27,6 +27,7 @@ export class RegisterComponent {
   name: string = '';
   email: string = '';
   password: string = '';
+  isSubmitting = false;
 
   ngOnInit(): void {
     const menu = document.querySelector('.menu-wrapper') as HTMLElement;
@@ -36,6 +37,9 @@ export class RegisterComponent {
   }
 
   async onSubmit() {
+    if (this.isSubmitting) return;
+    this.isSubmitting = true;
+
     const payload = {
       name: this.name,
       email: this.email,
@@ -74,10 +78,15 @@ export class RegisterComponent {
       }
     } catch (error) {
       console.error('Erro na requisição de cadastro:', error);
+    } finally {
+      this.isSubmitting = false;
     }
   }
 
   async googleLogin() {
+    if (this.isSubmitting) return;
+    this.isSubmitting = true;
+
     try {
       const { googleIdToken } = await this.authService.signInWithGoogle();
       const response = await fetch(`${this.apiUrl}/auth/google`, {
@@ -109,6 +118,8 @@ export class RegisterComponent {
       }
     } catch (error) {
       console.error('Erro no login com Google:', error);
+    } finally {
+      this.isSubmitting = false;
     }
   }
 }

@@ -20,8 +20,17 @@ export class AppComponent implements OnInit {
 
   appName: string = 'Sinu v1.0';
   apiUrl = environment.apiUrl;
-  isLoading: boolean = true; // Adiciona o estado de carregamento
+  isLoading: boolean = true;
   user: UserData | null = null;
+  loadingMessage = 'Verificando se é você mesmo...';
+
+  private loadingMessages = [
+    'Verificando se é você mesmo...',
+    'Quase lá...',
+    'Carregando seus dados com carinho...',
+  ];
+  private loadingStep = 0;
+  private loadingTimer?: any;
 
   constructor(
     private router: Router,
@@ -30,15 +39,21 @@ export class AppComponent implements OnInit {
   ) { }
 
   ngOnInit() {
+    this.startLoadingMessages();
     this.http.post<{ idToken: string }>(`${this.apiUrl}/auth/refresh`, {}, { withCredentials: true })
       .subscribe({
         next: r => {
           this.auth.setToken(r.idToken);
-          this.isLoading = false; // Esconde o loader em caso de sucesso
+          this.stopLoading();
         },
-        error: () => {
+        error: (err) => {
+          alert('Erro no /auth/refresh: ' + JSON.stringify({
+            status: err.status,
+            message: err.message
+          }));
+
           this.auth.setToken(null);
-          this.isLoading = false; // Esconde o loader em caso de erro
+          this.stopLoading();
 
           if (!this.router.url.includes('/login')) {
             this.redirectToLogin();
@@ -47,7 +62,29 @@ export class AppComponent implements OnInit {
       });
   }
 
-  redirectToLogin(){
+  private startLoadingMessages() {
+    this.loadingMessage = this.loadingMessages[0];
+    this.loadingStep = 0;
+
+    this.loadingTimer = setInterval(() => {
+      this.loadingStep = Math.min(
+        this.loadingStep + 1,
+        this.loadingMessages.length - 1
+      );
+      this.loadingMessage = this.loadingMessages[this.loadingStep];
+    }, 3000);
+  }
+
+  private stopLoading() {
+    this.isLoading = false;
+    if (this.loadingTimer) {
+      clearInterval(this.loadingTimer);
+      this.loadingTimer = undefined;
+    }
+  }
+
+
+  redirectToLogin() {
     this.router.navigate(['/login']);
   }
 }
