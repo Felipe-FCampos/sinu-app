@@ -46,12 +46,7 @@ export class AppComponent implements OnInit {
           this.auth.setToken(r.idToken);
           this.stopLoading();
         },
-        error: (err) => {
-          alert('Erro no /auth/refresh: ' + JSON.stringify({
-            status: err.status,
-            message: err.message
-          }));
-
+        error: () => {
           this.auth.setToken(null);
           this.stopLoading();
 

@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule, registerLocaleData, } from '@angular/common';
-import { Timestamp } from '@angular/fire/firestore';
+import { Timestamp } from 'firebase/firestore';
 import localePt from '@angular/common/locales/pt';
 import localeDe from '@angular/common/locales/de';
 import { CreateSubscriptionPayload, SubscriptionsService } from 'src/app/services/subscriptions.service';
