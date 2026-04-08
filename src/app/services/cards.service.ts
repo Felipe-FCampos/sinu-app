@@ -35,8 +35,9 @@ export interface StandalonePayment {
     price: number;
     category: string;
     installments: number;
-    cardBank: string;
-    cardFinalNumbers: string;
+    cardBank?: string;
+    cardFinalNumbers?: string;
+    paymentMethod: string;
     purchaseDate: string; // <-- CAMPO ADICIONADO
 }
 
@@ -46,8 +47,9 @@ export interface CreateStandalonePaymentPayload {
   price: number;
   category: string;
   installments: number;
-  cardBank: string;
-  cardFinalNumbers: string;
+  cardBank?: string;
+  cardFinalNumbers?: string;
+  paymentMethod: string;
   purchaseDate: string; // <-- CAMPO ADICIONADO
   description?: string | null;
 }

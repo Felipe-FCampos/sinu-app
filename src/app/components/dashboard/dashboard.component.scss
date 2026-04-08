@@ -6,7 +6,8 @@
 
 .summary-cost-card {
     background-color: #ffffff;
-    border-radius: 8px;
+    border-top: 4px solid #2c2c2c;
+    border-radius: 16px;
     padding: 16px;
     box-shadow: 0px 3px 6px rgba(0, 0, 0, 0.3);
 
@@ -20,7 +21,8 @@
 
 .summary-subscriptions-card {
     background-color: #ffffff;
-    border-radius: 8px;
+    border-top: 4px solid #2c2c2c;
+    border-radius: 16px;
     padding: 16px;
     box-shadow: 0px 3px 6px rgba(0, 0, 0, 0.3);
 }
@@ -96,4 +98,70 @@
     color: #2c2c2c;
     background-color: #bdbdbd37;
     border-radius: 0 0 8px 8px;
+}
+
+.summary-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1.25rem;
+
+    .summary-card {
+        background: #ffffff;
+        border-radius: 16px;
+        padding: 1rem;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        transition: transform 0.2s;
+
+        &:hover {
+            transform: translateY(-4px);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 1rem;
+
+            .label {
+                font-size: 0.85rem;
+                font-weight: 600;
+                color: #718096;
+                text-transform: uppercase;
+            }
+        }
+
+        .card-body {
+            h2 {
+                font-size: 1.8rem;
+                margin: 0;
+                font-weight: 700;
+            }
+
+            h3 {
+                font-size: 1.4rem;
+                margin: 0;
+                font-weight: 600;
+            }
+
+            .positive {
+                color: #38a169;
+            }
+
+            .negative {
+                color: #e53e3e;
+            }
+        }
+    }
+
+    .balance {
+        border-top: 4px solid #4a5568;
+    }
+
+    .income {
+        border-top: 4px solid #38a169;
+    }
+
+    .expenses {
+        border-top: 4px solid #e53e3e;
+    }
 }
