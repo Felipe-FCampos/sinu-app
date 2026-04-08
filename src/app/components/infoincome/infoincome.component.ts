@@ -26,7 +26,6 @@ export class InfoincomeComponent implements OnInit {
   isLoading: boolean = false;
   isSubmitting: boolean = false;
 
-  // Controle de Modais e Estados
   showSuccess: boolean = false;
   isUpdateMode: boolean = false;
   editingIncomeId: string | null = null;
@@ -63,7 +62,6 @@ export class InfoincomeComponent implements OnInit {
     });
   }
 
-  // --- Lógica de Filtro e Ordenação ---
   filterIncomes(searchTerm: string) {
     if (!searchTerm) {
       this.incomes = [...this.allIncomes];
@@ -84,7 +82,6 @@ export class InfoincomeComponent implements OnInit {
     }
   }
 
-  // --- Helpers de Formatação ---
   public getLocaleByCurrency(currencyCode: string): string {
     switch (currencyCode) {
       case 'BRL': return 'pt-BR';
@@ -94,7 +91,6 @@ export class InfoincomeComponent implements OnInit {
     }
   }
 
-  // --- Gerenciamento de Modais ---
   openAddIncomeForm() {
     this.isUpdateMode = false;
     this.resetForm();
@@ -104,7 +100,6 @@ export class InfoincomeComponent implements OnInit {
   openUpdateIncomeForm(income: Income) {
     this.isUpdateMode = true;
     this.editingIncomeId = income.id!;
-    // Criamos uma cópia para não alterar a lista principal antes de salvar
     this.newIncome = { ...income };
     this.toggleModal('.add-subscription-section', 'block');
   }
@@ -136,7 +131,6 @@ export class InfoincomeComponent implements OnInit {
     this.isSubmitting = false;
   }
 
-  // --- Ações de API ---
   addIncome() {
     if (!this.newIncome.name || this.newIncome.amount <= 0) return;
 

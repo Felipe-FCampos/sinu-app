@@ -16,16 +16,15 @@ export interface Card {
   status: number;
 }
 
-// Interface para criar um novo cartão (ajustada para corresponder ao Pydantic)
 export interface CreateCardPayload {
   cardName: string;
   cardBank: string;
   cardFinalNumbers: string;
   dueDate: number | null;
   closeDay: number | null;
-  limit: number; // Mantido como number, pois o Angular/TS trata float/int como number
+  limit: number;
   status: number;
-  totalSpent?: number; // Adicionado como opcional para consistência
+  totalSpent?: number;
 }
 
 export interface StandalonePayment {
@@ -38,10 +37,9 @@ export interface StandalonePayment {
     cardBank?: string;
     cardFinalNumbers?: string;
     paymentMethod: string;
-    purchaseDate: string; // <-- CAMPO ADICIONADO
+    purchaseDate: string;
 }
 
-// Payload para criar um novo pagamento avulso
 export interface CreateStandalonePaymentPayload {
   title: string;
   price: number;
@@ -50,11 +48,10 @@ export interface CreateStandalonePaymentPayload {
   cardBank?: string;
   cardFinalNumbers?: string;
   paymentMethod: string;
-  purchaseDate: string; // <-- CAMPO ADICIONADO
+  purchaseDate: string;
   description?: string | null;
 }
 
-// Representa um item dentro de uma fatura (uma parcela de um pagamento)
 export interface InvoiceItem {
     title: string;
     price: number;
@@ -63,7 +60,6 @@ export interface InvoiceItem {
     totalInstallments: number;
 }
 
-// Representa a fatura completa de um cartão em um determinado mês
 export interface Invoice {
     id: string;                 
     uid: string;                
@@ -72,13 +68,9 @@ export interface Invoice {
     dueDate: string;            
     totalAmount: number;
     items: InvoiceItem[];
-    status: 'open' | 'closed' | 'paid'; // Status da fatura
+    status: 'open' | 'closed' | 'paid';
 }
 
-// --- FIM DAS NOVAS INTERFACES ---
-
-
-// Interface para atualizar um cartão
 export type UpdateCardPayload = Partial<CreateCardPayload>;
 
 
@@ -153,7 +145,6 @@ export class CardsService {
     });
   }
 
-  // NOVO MÉTODO DE DELETE
   deleteStandalonePayment(paymentId: string): Observable<any> {
     return this.http.delete(`${this.apiUrl}/payment/standalonepayment/delete/${paymentId}`, {
       headers: this.getAuthHeaders()

@@ -18,7 +18,6 @@ interface UnifiedPaymentItem {
   cardFinalNumbers?: string | null;
 }
 
-// Interface para o novo resumo da API
 interface FinancialSummary {
   total_spent: number;
   total_received: number;
@@ -35,7 +34,6 @@ interface FinancialSummary {
 })
 export class DashboardComponent implements OnInit {
 
-  // Novo estado para o resumo do endpoint
   financialSummary: FinancialSummary = {
     total_spent: 0,
     total_received: 0,
@@ -74,7 +72,6 @@ export class DashboardComponent implements OnInit {
   }
 
   loadAllData() {
-    // Adicionamos o getFinancialSummary ao forkJoin para buscar em paralelo
     forkJoin({
       subscriptions: this.subscriptionsService.getAllSubscriptions(),
       standalonePayments: this.cardService.getAllStandalonePayments(),
@@ -87,7 +84,6 @@ export class DashboardComponent implements OnInit {
       }))
     ).subscribe(({ subscriptions, standalonePayments, summary }) => {
 
-      // 1. Atribui o resumo vindo da API (Consolidado em BRL)
       this.financialSummary = {
         total_spent: summary.total_spent / 100,
         total_received: summary.total_received / 100,
@@ -95,10 +91,8 @@ export class DashboardComponent implements OnInit {
         currency: summary.currency
       };
 
-      // 2. Processa as assinaturas (contagem de status)
       this.processSubscriptions(subscriptions);
 
-      // 3. Mantém a lógica de unificação para o detalhamento por moeda/cartão
       const unifiedPayments: UnifiedPaymentItem[] = [];
 
       const activeSubscriptions = subscriptions
@@ -117,7 +111,6 @@ export class DashboardComponent implements OnInit {
 
       unifiedPayments.push(...activeSubscriptions, ...allStandalonePayments);
 
-      // 4. Calcula os totais detalhados que você já tinha
       this.calculateTotals(unifiedPayments);
     });
   }
