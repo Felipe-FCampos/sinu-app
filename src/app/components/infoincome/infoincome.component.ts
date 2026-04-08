@@ -37,6 +37,7 @@ export class InfoincomeComponent implements OnInit {
     amount: 0,
     currency: 'BRL',
     category: 'Trabalho',
+    paymentMethod: 'PIX',
     receivedDate: new Date().toISOString().split('T')[0],
     isRecurring: false
   };

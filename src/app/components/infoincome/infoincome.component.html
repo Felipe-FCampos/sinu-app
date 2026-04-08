@@ -18,7 +18,8 @@
         <div class="subscriptionCard" (click)="openUpdateIncomeForm(income)">
             <div class="subscription-header">
                 <div class="subscription-name-status">
-                    <p class="status" [ngClass]="income.isRecurring ? 'status-recurrent' : 'status-separate' "><span class="dot"></span>
+                    <p class="status" [ngClass]="income.isRecurring ? 'status-recurrent' : 'status-separate' "><span
+                            class="dot"></span>
                         {{ income.isRecurring ? 'Receita recorrente' : 'Receita avulsa' }}
                     </p>
                     <h2>{{ income.name }}</h2>
@@ -107,6 +108,16 @@
                     </select>
                 </div>
 
+                <div class="subscription-type-container">
+                    <label for="paymentMethod">Forma de Recebimento:</label>
+                    <select id="paymentMethod" [(ngModel)]="newIncome.paymentMethod" name="paymentMethod" required>
+                        <option value="PIX">PIX</option>
+                        <option value="DINHEIRO">Dinheiro</option>
+                        <option value="TRANSFERENCIA">Transferência Bancária</option>
+                        <option value="OUTROS">Outros</option>
+                    </select>
+                </div>
+
                 <div class="billing-day-container">
                     <label for="receivedDate">Data do Recebimento:</label>
                     <input type="date" id="receivedDate" [(ngModel)]="newIncome.receivedDate" name="receivedDate"
@@ -121,9 +132,17 @@
                     </select>
                 </div>
 
-                <button type="submit" [disabled]="isSubmitting">
-                    {{ isSubmitting ? 'Salvando...' : (isUpdateMode ? 'Salvar Alterações' : 'Adicionar Receita') }}
-                </button>
+                <div class="action-buttons" style="display: flex; justify-content: space-between; gap: 8px;">
+                    <button type="submit" [disabled]="isSubmitting">
+                        {{ isSubmitting ? 'Salvando...' : (isUpdateMode ? 'Salvar Alterações' : 'Adicionar Receita') }}
+                    </button>
+
+                    @if (isUpdateMode) {
+                    <button type="button" class="delete-button" (click)="deleteIncome(editingIncomeId!)">
+                        Apagar
+                    </button>
+                    }
+                </div>
             </form>
         </section>
 
