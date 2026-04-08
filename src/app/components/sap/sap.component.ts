@@ -5,7 +5,6 @@ import { Card, CardsService, CreateStandalonePaymentPayload, StandalonePayment }
 import { CurrencyMaskDirective } from '../../currency-mask.directive';
 import { FilterComponent } from '../filter/filter.component';
 
-// Nova interface para a estrutura agrupada
 export interface GroupedPayments {
   monthYear: string;
   payments: StandalonePayment[];
@@ -14,15 +13,14 @@ export interface GroupedPayments {
 @Component({
   selector: 'app-sap',
   standalone: true,
-  imports: [CommonModule, FormsModule, CurrencyMaskDirective, FilterComponent], // 2. Adicionar aos imports
+  imports: [CommonModule, FormsModule, CurrencyMaskDirective, FilterComponent],
   templateUrl: './sap.component.html',
   styleUrls: ['./sap.component.scss'],
 })
 export class SapComponent implements OnInit {
   public isLoading = true;
   allPayments: StandalonePayment[] = [];
-  // 1. Adicionar uma nova propriedade para os pagamentos filtrados
-  filteredPayments: StandalonePayment[] = []; 
+  filteredPayments: StandalonePayment[] = [];
   groupedPayments: { monthYear: string, payments: StandalonePayment[] }[] = [];
   public availableCards: Card[] = [];
 
@@ -31,19 +29,16 @@ export class SapComponent implements OnInit {
   public showSuccessModal = false;
   public showManualCardInput = false;
 
-  // --- NOVAS PROPRIEDADES ---
-  public showUpdatePaymentModal = false; // Controla o modal de edição
-  public showUpdateSuccessModal = false; // Controla o sucesso da edição
-  public showDeleteSuccessModal = false; // Controla o sucesso da exclusão
-  public editingPaymentId: string | null = null; // Guarda o ID do pagamento em edição
+  public showUpdatePaymentModal = false;
+  public showUpdateSuccessModal = false;
+  public showDeleteSuccessModal = false;
+  public editingPaymentId: string | null = null;
 
-  // 1. Adicionar a lista de bancos
   public bankList = [
-    'Banco do Brasil', 'Caixa Econômica', 'Itaú', 'Bradesco', 'Santander', 
+    'Banco do Brasil', 'Caixa Econômica', 'Itaú', 'Bradesco', 'Santander',
     'Banco Inter', 'PicPay', 'Nubank', 'C6 Bank', 'Outro'
   ];
 
-  // --- 3. Lista de categorias pré-definidas ---
   public paymentCategories = [
     { value: 'Alimentação', label: 'Alimentação' },
     { value: 'Transporte', label: 'Transporte' },
@@ -56,41 +51,37 @@ export class SapComponent implements OnInit {
     { value: 'Outros', label: 'Outros' },
   ];
 
-  // Objeto para vincular os dados do formulário
   public newPayment: Partial<CreateStandalonePaymentPayload> = {
     title: '',
     price: 0,
-    category: 'Outros', // <-- Valor padrão
+    category: 'Outros',
+    paymentMethod: 'CREDIT_CARD',
     installments: 1,
-    cardBank: '', // Será preenchido dinamicamente
+    cardBank: '',
     cardFinalNumbers: '',
     purchaseDate: '',
     description: ''
   };
 
-  constructor( private sapService: CardsService) {}
+  constructor(private sapService: CardsService) { }
 
+  // ngOnInit
   ngOnInit(): void {
-    // 2. Renomear a chamada para o método unificado
     this.loadInitialData();
   }
 
-  // 3. Criar um método unificado para carregar todos os dados iniciais
+  // loadInitialData
   loadInitialData(): void {
     this.isLoading = true;
-    // Usar forkJoin para carregar dados em paralelo seria uma otimização futura
     this.sapService.getAllStandalonePayments().subscribe(payments => {
       this.allPayments = payments;
-      this.loadAvailableCards(); // Carrega os cartões depois que os pagamentos chegam
-      this.filterPayments(''); // Inicializa com a lista completa
+      this.loadAvailableCards();
+      this.filterPayments('');
       this.isLoading = false;
     });
   }
 
-  // 4. Remover o método antigo e a chamada duplicada no ngOnInit
-  // listStandalonePayments(): void { ... } foi removido
-
-  // 5. Corrigir o método de filtro para usar as variáveis corretas
+  // filterPayments
   filterPayments(searchTerm: string) {
     const term = searchTerm.toLowerCase();
     if (!term) {
@@ -100,13 +91,13 @@ export class SapComponent implements OnInit {
         payment.title.toLowerCase().includes(term)
       );
     }
-    // Após filtrar, reagrupa os pagamentos
     this.groupPaymentsByMonth();
   }
 
+  // loadAvailableCards
   loadAvailableCards() {
     this.sapService.getAllCards().subscribe({
-      next: (res: { cards: Card[] }) => { // API retorna { cards: Card[] }
+      next: (res: { cards: Card[] }) => {
         this.availableCards = res.cards;
       },
       error: (err) => {
@@ -115,32 +106,30 @@ export class SapComponent implements OnInit {
     });
   }
 
-  // --- 4. Métodos para o formulário ---
-
+  // openAddPaymentForm
   openAddPaymentForm() {
     this.resetForm();
     this.showAddPaymentModal = true;
   }
 
+  // closeAddPaymentForm
   closeAddPaymentForm() {
     this.showAddPaymentModal = false;
     this.resetForm();
   }
 
-  // --- NOVOS MÉTODOS PARA O MODAL DE EDIÇÃO ---
+  // openUpdatePaymentForm
   openUpdatePaymentForm(payment: StandalonePayment) {
     this.editingPaymentId = payment.id;
-    // Converte o preço de centavos para o formato do input e a data para o formato YYYY-MM-DD
     this.newPayment = {
       ...payment,
       price: payment.price / 100,
       purchaseDate: new Date(payment.purchaseDate).toISOString().split('T')[0]
     };
 
-    // Lógica para mostrar campos manuais se o cartão não estiver salvo
-    const cardExists = this.availableCards.some(c => c.cardFinalNumbers === payment.cardFinalNumbers);
-    if (!cardExists) {
-      this.showManualCardInput = true;
+    if (this.newPayment.paymentMethod === 'CREDIT_CARD' || this.newPayment.paymentMethod === 'DEBIT_CARD') {
+      const cardExists = this.availableCards.some(c => c.cardFinalNumbers === payment.cardFinalNumbers);
+      this.showManualCardInput = !cardExists;
     } else {
       this.showManualCardInput = false;
     }
@@ -148,6 +137,7 @@ export class SapComponent implements OnInit {
     this.showUpdatePaymentModal = true;
   }
 
+  // closeUpdatePaymentForm
   closeUpdatePaymentForm() {
     this.showUpdatePaymentModal = false;
     this.editingPaymentId = null;
@@ -155,19 +145,25 @@ export class SapComponent implements OnInit {
     this.resetForm();
   }
 
-  // --- FIM DOS NOVOS MÉTODOS ---
-
+  // addStandalonePayment
   addStandalonePayment() {
-    if (!this.newPayment.cardFinalNumbers) {
+    const needsCard = this.newPayment.paymentMethod === 'CREDIT_CARD' || this.newPayment.paymentMethod === 'DEBIT_CARD';
+
+    if (needsCard && !this.newPayment.cardFinalNumbers) {
       alert('Por favor, selecione um cartão.');
       return;
     }
+
     this.isSubmitting = true;
 
-    // Encontra o banco do cartão selecionado
-    const selectedCard = this.availableCards.find(c => c.cardFinalNumbers === this.newPayment.cardFinalNumbers);
-    if (selectedCard) {
-      this.newPayment.cardBank = selectedCard.cardBank;
+    if (!needsCard) {
+      this.newPayment.cardBank = '';
+      this.newPayment.cardFinalNumbers = '';
+    } else {
+      const selectedCard = this.availableCards.find(c => c.cardFinalNumbers === this.newPayment.cardFinalNumbers);
+      if (selectedCard) {
+        this.newPayment.cardBank = selectedCard.cardBank;
+      }
     }
 
     this.sapService.addStandalonePayment(this.newPayment as CreateStandalonePaymentPayload).subscribe({
@@ -175,43 +171,43 @@ export class SapComponent implements OnInit {
         this.isSubmitting = false;
         this.closeAddPaymentForm();
         this.showSuccessModal = true;
-        this.loadInitialData(); // Recarrega os dados
+        this.loadInitialData();
       },
       error: (err) => {
         console.error('Erro ao adicionar pagamento:', err);
         this.isSubmitting = false;
-        alert('Falha ao adicionar pagamento. Verifique os dados e tente novamente.');
       }
     });
   }
 
-  // --- NOVO MÉTODO: updateStandalonePayment ---
+  // updateStandalonePayment
   updateStandalonePayment() {
     if (!this.editingPaymentId) return;
 
-    this.isSubmitting = true;
+    const needsCard = this.newPayment.paymentMethod === 'CREDIT_CARD' || this.newPayment.paymentMethod === 'DEBIT_CARD';
+    if (!needsCard) {
+      this.newPayment.cardBank = '';
+      this.newPayment.cardFinalNumbers = '';
+    }
 
-    // O payload já está em this.newPayment
+    this.isSubmitting = true;
     this.sapService.updateStandalonePayment(this.editingPaymentId, this.newPayment).subscribe({
       next: () => {
         this.isSubmitting = false;
         this.closeUpdatePaymentForm();
         this.showUpdateSuccessModal = true;
-        this.loadInitialData(); // Recarrega a lista
+        this.loadInitialData();
       },
       error: (err) => {
         console.error('Erro ao atualizar pagamento:', err);
         this.isSubmitting = false;
-        alert('Falha ao atualizar pagamento.');
       }
     });
   }
 
-  // --- NOVO MÉTODO: deleteStandalonePayment ---
+  // deleteStandalonePayment
   deleteStandalonePayment(paymentId: string) {
     if (!paymentId) return;
-
-    // 7. Corrigir a busca do pagamento a ser deletado
     const paymentToDelete = this.allPayments.find(p => p.id === paymentId);
     const paymentTitle = paymentToDelete ? paymentToDelete.title : 'este pagamento';
 
@@ -222,43 +218,45 @@ export class SapComponent implements OnInit {
           this.isSubmitting = false;
           this.closeUpdatePaymentForm();
           this.showDeleteSuccessModal = true;
-          this.loadInitialData(); // Recarrega a lista
+          this.loadInitialData();
         },
         error: (err) => {
           console.error('Erro ao apagar pagamento:', err);
           this.isSubmitting = false;
-          alert('Falha ao apagar pagamento.');
         }
       });
     }
   }
 
+  // closeSuccessModal
   closeSuccessModal() {
     this.showSuccessModal = false;
-    this.showUpdateSuccessModal = false; // Também reseta os novos modais
-    this.showDeleteSuccessModal = false; // Também reseta os novos modais
+    this.showUpdateSuccessModal = false;
+    this.showDeleteSuccessModal = false;
   }
 
+  // resetForm
   private resetForm() {
     this.newPayment = {
       title: '',
       price: 0,
-      category: '',
+      category: 'Outros',
+      paymentMethod: 'CREDIT_CARD',
       installments: 1,
       cardBank: '',
       cardFinalNumbers: '',
-      purchaseDate: new Date().toISOString().split('T')[0], // Preenche com a data de hoje
+      purchaseDate: new Date().toISOString().split('T')[0],
       description: ''
     };
+    this.showManualCardInput = false;
   }
 
+  // groupPaymentsByMonth
   private groupPaymentsByMonth() {
     const groups = new Map<string, StandalonePayment[]>();
 
-    // 8. Usar a lista filtrada (filteredPayments) em vez de uma variável inexistente
     for (const payment of this.filteredPayments) {
       const date = new Date(payment.purchaseDate);
-      // Adiciona 1 ao mês, pois getMonth() é baseado em zero (0-11)
       const monthYearKey = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}`;
 
       if (!groups.has(monthYearKey)) {
@@ -272,7 +270,6 @@ export class SapComponent implements OnInit {
       .map(([key, payments]) => {
         const [year, month] = key.split('-');
         const monthName = new Date(parseInt(year), parseInt(month) - 1).toLocaleString('pt-BR', { month: 'long' });
-        
         payments.sort((a, b) => new Date(b.purchaseDate).getTime() - new Date(a.purchaseDate).getTime());
 
         return {
@@ -282,12 +279,12 @@ export class SapComponent implements OnInit {
       });
   }
 
-  // Adicionar este método
+  // onCardSelectionChange
   onCardSelectionChange(selectedValue: string) {
     if (selectedValue === 'manual') {
       this.showManualCardInput = true;
       this.newPayment.cardFinalNumbers = '';
-      this.newPayment.cardBank = ''; // Limpa para nova seleção
+      this.newPayment.cardBank = '';
     } else {
       this.showManualCardInput = false;
       const selectedCard = this.availableCards.find(c => c.cardFinalNumbers === selectedValue);

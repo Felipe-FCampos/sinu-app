@@ -1,0 +1,10 @@
+<section class="home-page">
+  <p class="app-name">{{ appName }}</p>
+  @if (user) {
+    <p class="welcome-message">Suas receitas, {{ user.name.split(' ')[0] }}!</p>
+  }
+
+  <div class="subscriptions-section">
+    <app-infoincome></app-infoincome>
+  </div>
+</section>

@@ -1,32 +1,45 @@
 import { Component, OnInit } from '@angular/core';
 import { Subscription, SubscriptionStatus } from '../subscriptions/subscriptions.component';
 import { SubscriptionsService } from 'src/app/services/subscriptions.service';
-import { Card, CardsService, StandalonePayment } from 'src/app/services/cards.service'; // Importar StandalonePayment
+import { Card, CardsService, StandalonePayment } from 'src/app/services/cards.service';
 import { CurrencyPipe, KeyValuePipe } from '@angular/common';
 import localePt from '@angular/common/locales/pt';
 import localeDe from '@angular/common/locales/de';
 import { registerLocaleData } from '@angular/common';
-import { forkJoin, map } from 'rxjs'; // Importar map do rxjs
+import { forkJoin, map } from 'rxjs';
+import { DashboardService } from 'src/app/services/dashboard.service';
 
-// Registre os locales que você vai usar
 registerLocaleData(localePt, 'pt-BR');
 registerLocaleData(localeDe, 'de-DE');
 
-// Interface para unificar os itens de gasto
 interface UnifiedPaymentItem {
   price: number;
   currency: string;
   cardFinalNumbers?: string | null;
 }
 
+interface FinancialSummary {
+  total_spent: number;
+  total_received: number;
+  balance: number;
+  currency: string;
+}
+
 @Component({
   selector: 'app-dashboard',
-  standalone: true, // standalone: true
+  standalone: true,
   imports: [CurrencyPipe, KeyValuePipe],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.scss',
 })
 export class DashboardComponent implements OnInit {
+
+  financialSummary: FinancialSummary = {
+    total_spent: 0,
+    total_received: 0,
+    balance: 0,
+    currency: 'BRL'
+  };
 
   subscriptions: Subscription[] = [];
   totalCostsByCurrency: { [key: string]: number } = {};
@@ -40,7 +53,8 @@ export class DashboardComponent implements OnInit {
 
   constructor(
     private subscriptionsService: SubscriptionsService,
-    private cardService: CardsService // Re-injetar o serviço
+    private dashboardService: DashboardService,
+    private cardService: CardsService
   ) { }
 
   ngOnInit() {
@@ -49,56 +63,54 @@ export class DashboardComponent implements OnInit {
 
   public getLocaleByCurrency(currencyCode: string): string {
     switch (currencyCode) {
-      case 'BRL':
-        return 'pt-BR';
-      case 'EUR':
-        return 'de-DE';
+      case 'BRL': return 'pt-BR';
+      case 'EUR': return 'de-DE';
       case 'USD':
-      case 'AUD':
-        return 'en-US';
-      default:
-        return 'en-US';
+      case 'AUD': return 'en-US';
+      default: return 'en-US';
     }
   }
 
   loadAllData() {
-    // Usar forkJoin para buscar assinaturas e pagamentos avulsos em paralelo
     forkJoin({
       subscriptions: this.subscriptionsService.getAllSubscriptions(),
-      standalonePayments: this.cardService.getAllStandalonePayments()
+      standalonePayments: this.cardService.getAllStandalonePayments(),
+      summary: this.dashboardService.getFinancialSummary()
     }).pipe(
-      // Adicione este 'pipe' para garantir a tipagem correta dos dados da API
-      map(({ subscriptions, standalonePayments }) => ({
+      map(({ subscriptions, standalonePayments, summary }) => ({
         subscriptions: subscriptions as Subscription[],
-        standalonePayments: standalonePayments as StandalonePayment[]
+        standalonePayments: standalonePayments as StandalonePayment[],
+        summary: summary as FinancialSummary
       }))
-    ).subscribe(({ subscriptions, standalonePayments }) => {
-      
-      // Processa as assinaturas (contagem de status)
+    ).subscribe(({ subscriptions, standalonePayments, summary }) => {
+
+      this.financialSummary = {
+        total_spent: summary.total_spent / 100,
+        total_received: summary.total_received / 100,
+        balance: summary.balance / 100,
+        currency: summary.currency
+      };
+
       this.processSubscriptions(subscriptions);
 
-      // Cria uma lista unificada de itens de gasto
       const unifiedPayments: UnifiedPaymentItem[] = [];
 
-      // Adiciona assinaturas ativas e a vencer à lista unificada
       const activeSubscriptions = subscriptions
-        .filter(sub => sub.status === SubscriptionStatus.Active || sub.status === SubscriptionStatus.Expiring) // CORREÇÃO AQUI
+        .filter(sub => sub.status === SubscriptionStatus.Active || sub.status === SubscriptionStatus.Expiring)
         .map(sub => ({
           price: sub.price / 100,
           currency: sub.currency,
           cardFinalNumbers: sub.cardFinalNumbers
         }));
-      
-      // Adiciona pagamentos avulsos à lista unificada
+
       const allStandalonePayments = standalonePayments.map(p => ({
         price: p.price / 100,
-        currency: 'BRL', // Assumindo que pagamentos avulsos são sempre BRL
+        currency: 'BRL',
         cardFinalNumbers: p.cardFinalNumbers
       }));
 
       unifiedPayments.push(...activeSubscriptions, ...allStandalonePayments);
 
-      // Calcula os totais com base na lista unificada
       this.calculateTotals(unifiedPayments);
     });
   }
@@ -112,18 +124,15 @@ export class DashboardComponent implements OnInit {
   }
 
   calculateTotals(payments: UnifiedPaymentItem[]) {
-    // Reseta os totais
     this.totalCostsByCurrency = {};
     this.totalCostsByCard = {};
 
     payments.forEach(item => {
-      // Calcula o total por moeda
       if (!this.totalCostsByCurrency[item.currency]) {
         this.totalCostsByCurrency[item.currency] = 0;
       }
       this.totalCostsByCurrency[item.currency] += item.price;
 
-      // Calcula o total por cartão
       if (item.cardFinalNumbers) {
         if (!this.totalCostsByCard[item.cardFinalNumbers]) {
           this.totalCostsByCard[item.cardFinalNumbers] = {};

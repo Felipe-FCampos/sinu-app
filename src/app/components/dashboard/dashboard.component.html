@@ -1,6 +1,47 @@
 <div class="dashboard-container">
+    <div class="summary-grid">
+        <div class="summary-card balance">
+            <div class="card-header">
+                <span class="icon">💰</span>
+                <span class="label">Saldo Atual</span>
+            </div>
+            <div class="card-body">
+                <h2 [class.negative]="financialSummary.balance < 0" [class.positive]="financialSummary.balance > 0">
+                    {{ financialSummary.balance | currency: financialSummary.currency : 'symbol' : '1.2-2' :
+                    getLocaleByCurrency(financialSummary.currency) }}
+                </h2>
+            </div>
+        </div>
+
+        <div class="summary-card income">
+            <div class="card-header">
+                <span class="icon">📈</span>
+                <span class="label">Total Recebido</span>
+            </div>
+            <div class="card-body">
+                <h3 class="positive">
+                    + {{ financialSummary.total_received | currency: financialSummary.currency : 'symbol' : '1.2-2' :
+                    getLocaleByCurrency(financialSummary.currency) }}
+                </h3>
+            </div>
+        </div>
+
+        <div class="summary-card expenses">
+            <div class="card-header">
+                <span class="icon">📉</span>
+                <span class="label">Total de Gastos</span>
+            </div>
+            <div class="card-body">
+                <h3 class="negative">
+                    - {{ financialSummary.total_spent | currency: financialSummary.currency : 'symbol' : '1.2-2' :
+                    getLocaleByCurrency(financialSummary.currency) }}
+                </h3>
+            </div>
+        </div>
+    </div>
+
     <div class="summary-cost-card">
-        <p class="summary-cost-title">Total gasto por mês:</p>
+        <p class="summary-cost-title">Gasto por moeda:</p>
         @for (cost of totalCostsByCurrency | keyvalue; track cost.key) {
         <p class="summary-cost-item">
             ({{ cost.key }}):

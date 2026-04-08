@@ -1,0 +1,142 @@
+<section class="subscriptions-section">
+    <section class="subscriptions-section">
+        <div class="subscriptions-header">
+            <app-filter (searchChange)="filterIncomes($event)" [showSortButton]="true"
+                (sortChange)="toggleSortByDate()">
+            </app-filter>
+        </div>
+
+        @if (isLoading) {
+        <div class="loading-container"
+            style="display: flex; justify-content: center; align-items: center; flex-direction: column; margin-top: 24px;">
+            <div class="spinner"></div>
+            <p>Carregando receitas...</p>
+        </div>
+        } @else {
+        @if (incomes && incomes.length > 0) {
+        @for (income of incomes; track income.id) {
+        <div class="subscriptionCard" (click)="openUpdateIncomeForm(income)">
+            <div class="subscription-header">
+                <div class="subscription-name-status">
+                    <p class="status" [ngClass]="income.isRecurring ? 'status-recurrent' : 'status-separate' "><span class="dot"></span>
+                        {{ income.isRecurring ? 'Receita recorrente' : 'Receita avulsa' }}
+                    </p>
+                    <h2>{{ income.name }}</h2>
+                </div>
+                <p class="subscription-price">
+                    {{ income.amount / 100 | currency: income.currency : 'symbol' : undefined :
+                    getLocaleByCurrency(income.currency) }}
+                </p>
+            </div>
+
+            <div class="subscription-details">
+                <p class="billing-date">Data do Recebimento: {{ income.receivedDate | date:'dd/MM/yyyy' }}</p>
+                @if (income.paymentMethod) {
+                <p class="payment-info">Forma de recebimento: {{ income.paymentMethod }}</p>
+                }
+            </div>
+        </div>
+        }
+        } @else {
+        <div class="no-subscriptions-message">
+            <span>
+                <svg xmlns="http://www.w3.org/2000/svg" height="64px" viewBox="0 -960 960 960" width="64px"
+                    fill="#2c2c2c">
+                    <path
+                        d="M441-120v-86q-53-12-91.5-46T293-348l74-30q15 47 45 70.5t88 23.5q55 0 81-28.5t26-68.5q0-46-27-71.5t-97-56.5q-80-26-114-66t-34-100q0-58 35-99.5t94-52.5v-83h80v83q45 10 77.5 39.5T585-644l-72 30q-12-32-35-51t-70-19q-46 0-71.5 22.5T311-600q0 39 27.5 61t94.5 49q83 28 116 66.5t33 103.5q0 64-37.5 108T441-120Z" />
+                </svg>
+            </span>
+            <p>Você ainda não possui receitas registradas.</p>
+            <p>Clique no botão '+' para adicionar!</p>
+        </div>
+        }
+        }
+
+        <button class="add-subscription-button" (click)="openAddIncomeForm()">+</button>
+
+        <section style="display: none;" class="add-subscription-section income-modal">
+            <div class="add-subscription-header">
+                <h2>{{ isUpdateMode ? 'Editar Receita' : 'Adicionar Nova Receita' }}</h2>
+                <button class="close-button" (click)="closeIncomeForm()">
+                    <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px"
+                        fill="#2c2c2c">
+                        <path
+                            d="m256-200-56-56 224-224-224-224 56-56 224 224 224-224 56 56-224 224 224 224-56 56-224-224-224 224Z" />
+                    </svg>
+                </button>
+            </div>
+
+            <form (ngSubmit)="isUpdateMode ? updateIncome() : addIncome()">
+                <div class="name-container">
+                    <label for="name">Nome:</label>
+                    <input id="name" [(ngModel)]="newIncome.name" name="name" required
+                        placeholder="Ex: Salário, Freelance..." />
+                </div>
+
+                <div class="name-container">
+                    <label for="description">Descrição:</label>
+                    <input id="description" [(ngModel)]="newIncome.description" name="description" required
+                        placeholder="Ex: Freelance para cliente x..." />
+                </div>
+
+                <div class="price-currency-container">
+                    <div class="price-currency-group">
+                        <label for="price">Valor:</label>
+                        <input id="price" type="text" inputmode="decimal" [(ngModel)]="newIncome.amount" name="amount"
+                            appCurrencyMask required />
+                    </div>
+
+                    <div class="price-currency-group">
+                        <label for="currency">Moeda:</label>
+                        <select id="currency" [(ngModel)]="newIncome.currency" name="currency" required>
+                            <option value="BRL">Real (BRL)</option>
+                            <option value="USD">Dólar (USD)</option>
+                            <option value="EUR">Euro (EUR)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="subscription-type-container">
+                    <label for="category">Categoria:</label>
+                    <select id="category" [(ngModel)]="newIncome.category" name="category" required>
+                        <option value="Trabalho">Trabalho / Salário</option>
+                        <option value="Freelance">Freelance</option>
+                        <option value="Investimento">Investimento</option>
+                        <option value="Presente">Presente</option>
+                        <option value="Outros">Outros</option>
+                    </select>
+                </div>
+
+                <div class="billing-day-container">
+                    <label for="receivedDate">Data do Recebimento:</label>
+                    <input type="date" id="receivedDate" [(ngModel)]="newIncome.receivedDate" name="receivedDate"
+                        required />
+                </div>
+
+                <div class="payment-method-container">
+                    <label for="isRecurring">É uma receita recorrente?</label>
+                    <select id="isRecurring" [(ngModel)]="newIncome.isRecurring" name="isRecurring">
+                        <option [ngValue]="false">Não</option>
+                        <option [ngValue]="true">Sim (Mensal)</option>
+                    </select>
+                </div>
+
+                <button type="submit" [disabled]="isSubmitting">
+                    {{ isSubmitting ? 'Salvando...' : (isUpdateMode ? 'Salvar Alterações' : 'Adicionar Receita') }}
+                </button>
+            </form>
+        </section>
+
+        <div style="display: none;" class="div_background_modal" (click)="closeIncomeForm()"></div>
+    </section>
+
+    @if (showSuccess) {
+    <div class="success-modal">
+        <div class="success-modal-backdrop"></div>
+        <div class="success-modal-content">
+            <p>Operação realizada com sucesso!</p>
+            <button (click)="showSuccess = false">OK</button>
+        </div>
+    </div>
+    }
+</section>

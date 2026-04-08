@@ -11,6 +11,7 @@ import { SapsComponent } from './pages/saps/saps.component';
 import { SettingsComponent } from './pages/settings/settings.component';
 import { AdvancedsettingsComponent } from './pages/advancedsettings/advancedsettings.component';
 import { SupportComponent } from './pages/support/support.component';
+import { IncomeComponent } from './pages/income/income.component';
 
 export const routes: Routes = [
     {
@@ -26,6 +27,7 @@ export const routes: Routes = [
         canActivateChild: [authGuard],
         children: [
             { path: '', component: HomeComponent },
+            { path: 'income', component: IncomeComponent },
             { path: 'subscriptions', component: SubsComponent },
             { path: 'standalonepayments', component: SapsComponent },
             { path: 'profile', component: ProfileComponent },
