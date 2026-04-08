@@ -197,7 +197,6 @@ section {
   }
 
   button[type="submit"] {
-    margin-top: 8px;
     width: 100%;
     padding: 10px 0;
     border-radius: 6px;
@@ -304,4 +303,14 @@ section {
   color: #fff;
   font-weight: 600;
   cursor: pointer;
+}
+
+.delete-button {
+    background-color: #ff4d4d;
+    border: none;
+    color: white;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 600;
 }
