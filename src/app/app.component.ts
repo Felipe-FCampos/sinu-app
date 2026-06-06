@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { timeout } from 'rxjs/operators';
 
 import { RouterOutlet } from '@angular/router';
 import { Router } from '@angular/router';
@@ -41,6 +42,10 @@ export class AppComponent implements OnInit {
   ngOnInit() {
     this.startLoadingMessages();
     this.http.post<{ idToken: string }>(`${this.apiUrl}/auth/refresh`, {}, { withCredentials: true })
+      .pipe(
+        // 2. Adicione o operador pipe com o timeout (ex: 5000ms = 5 segundos)
+        timeout(5000)
+      )
       .subscribe({
         next: r => {
           this.auth.setToken(r.idToken);
