@@ -174,7 +174,8 @@ $spin-duration: 2000ms; // rotação da logo
 }
 
 .login-button[disabled],
-.google-button[disabled] {          
+.google-button[disabled] {   
+  padding: 8px;       
   opacity: 0.7;
   cursor: not-allowed;
 }
