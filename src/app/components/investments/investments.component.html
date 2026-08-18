@@ -1,0 +1,314 @@
+<section class="investments-section">
+
+    <div class="investments-header">
+        <app-filter (searchChange)="filterInvestments($event)" [statusOptions]="statusFilterOptions"
+            (statusChange)="onStatusFilterChange($event)" [showSortButton]="true" [isSorted]="isSortedByValue"
+            (sortChange)="toggleSortByValue()">
+        </app-filter>
+    </div>
+
+    @if (isLoading) {
+    <div class="loading-container"
+        style="display: flex; justify-content: center; align-items: center; flex-direction: column; margin-top: 24px;">
+        <div class="spinner"></div>
+        <p>Carregando investimentos...</p>
+    </div>
+    } @else {
+    @if (investments && investments.length > 0) {
+    @for (investment of investments; track investment.id) {
+    <div class="investmentCard" (click)="openUpdateInvestmentForm(investment)">
+        <div class="investment-header">
+            <div class="investment-name-status">
+                <p class="status" [ngClass]="'status-' + investment.status">
+                    <span class="dot"></span>
+                    {{ getStatusLabel(investment.status) }}
+                </p>
+                <h2>{{ investment.name }}</h2>
+            </div>
+            <p class="investment-price">
+                {{ investment.final_value / 100 | currency: 'BRL' : 'symbol' : undefined : 'pt-BR' }}
+            </p>
+        </div>
+
+        <div class="investment-details">
+            <div class="payment-info">
+                <p>Tipo: {{ getTypeLabel(investment.investment_type) }}</p>
+                @if (investment.cdi_percentage) {
+                <p>Rentabilidade: {{ investment.cdi_percentage }}% do CDI</p>
+                }
+            </div>
+            <p class="billing-date">Última Atualização: {{ investment.updatedAt | date:'dd/MM/yyyy' }}</p>
+        </div>
+
+        <div class="investment-footer-action" (click)="openTransactionForm(investment, $event)">
+            Movimentar (Aporte / Resgate)
+        </div>
+    </div>
+    }
+    } @else {
+    <div class="no-investments-message">
+        <span style="margin-bottom: 32px;">
+            <svg xmlns="http://www.w3.org/2000/svg" height="64px" viewBox="0 0 24 24" width="64px" fill="#2c2c2c">
+                <path d="M0 0h24v24H0V0z" fill="none" />
+                <path
+                    d="M6.5 10h-2v7h2v-7zm6 0h-2v7h2v-7zm8.5 9H2v2h19v-2zm-2.5-9h-2v7h2v-7zm-7-6.74L16.71 6H6.29l5.21-2.74m0-2.26L2 6v2h19V6l-9.5-5z" />
+            </svg>
+        </span>
+        <p>Você ainda não possui investimentos cadastrados.</p>
+        <p>Clique no botão '+' para adicionar o seu primeiro!</p>
+    </div>
+    }
+    }
+
+    <button class="add-investment-button" (click)="openAddInvestmentForm()">+</button>
+
+    <!-- Background Backdrop para Modals -->
+    <div style="display: none;" class="div_background_modal"></div>
+
+    <!-- Modal: Adicionar Investimento -->
+    <section style="display: none;" class="add-investment-section">
+        <div class="add-investment-header">
+            <h2>Adicionar Novo Investimento</h2>
+            <button class="close-button" (click)="closeAddInvestmentForm()">
+                <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px"
+                    fill="#2c2c2c">
+                    <path
+                        d="m256-200-56-56 224-224-224-224 56-56 224 224 224-224 56 56-224 224 224 224-56 56-224-224-224 224Z" />
+                </svg>
+            </button>
+        </div>
+
+        <form (ngSubmit)="addInvestment()">
+            <div class="name-container">
+                <label for="name">Nome do Investimento:</label>
+                <input id="name" [(ngModel)]="newInvestment.name" name="name" required
+                    placeholder="Ex: CDB Banco Inter 110%" />
+            </div>
+
+            <div class="price-currency-container">
+                <div class="price-currency-group">
+                    <label for="initialValue">Valor Inicial:</label>
+                    <input id="initialValue" type="text" inputmode="decimal" [(ngModel)]="newInvestment.initial_value"
+                        name="initial_value" appCurrencyMask required />
+                </div>
+
+                <div class="price-currency-group">
+                    <label for="cdiPercentage">% do CDI (opcional):</label>
+                    <input id="cdiPercentage" type="number" [(ngModel)]="newInvestment.cdi_percentage"
+                        name="cdi_percentage" placeholder="Ex: 110" />
+                </div>
+            </div>
+
+            <div class="investment-type-container">
+                <label for="investmentType">Tipo de Investimento:</label>
+                <select id="investmentType" [(ngModel)]="newInvestment.investment_type" name="investment_type" required>
+                    @for (type of investmentTypes; track type.value) {
+                    <option [value]="type.value">{{ type.label }}</option>
+                    }
+                </select>
+            </div>
+
+            <div class="notes-container">
+                <label for="notes">Observações:</label>
+                <input id="notes" [(ngModel)]="newInvestment.notes" name="notes"
+                    placeholder="Observações adicionais..." />
+            </div>
+
+            <div style="display: flex; justify-content: space-between; gap: 8px;">
+                <button type="submit" [disabled]="isSubmitting">
+                    {{ isSubmitting ? 'Adicionando...' : 'Adicionar Investimento' }}
+                </button>
+            </div>
+        </form>
+
+        @if (isSubmitting) {
+        <div class="loader-overlay">
+            <div class="spinner"></div>
+        </div>
+        }
+    </section>
+
+    <!-- Modal: Editar Investimento -->
+    <section style="display: none;" class="update-investment-section">
+        <div class="update-investment-header">
+            <h2>Editar Investimento</h2>
+            <button class="close-button" (click)="closeUpdateInvestmentForm()">
+                <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px"
+                    fill="#2c2c2c">
+                    <path
+                        d="m256-200-56-56 224-224-224-224 56-56 224 224 224-224 56 56-224 224 224 224-56 56-224-224-224 224Z" />
+                </svg>
+            </button>
+        </div>
+
+        <form (ngSubmit)="updateInvestment()">
+            <div class="name-container">
+                <label for="edit-name">Nome:</label>
+                <input id="edit-name" [(ngModel)]="newInvestment.name" name="name" required />
+            </div>
+
+            <div class="investment-type-container">
+                <label for="edit-investmentType">Tipo de Investimento:</label>
+                <select id="edit-investmentType" [(ngModel)]="newInvestment.investment_type" name="investment_type"
+                    required>
+                    @for (type of investmentTypes; track type.value) {
+                    <option [value]="type.value">{{ type.label }}</option>
+                    }
+                </select>
+            </div>
+
+            <div class="price-currency-container">
+                <div class="price-currency-group">
+                    <label for="edit-cdiPercentage">% do CDI:</label>
+                    <input id="edit-cdiPercentage" type="number" [(ngModel)]="newInvestment.cdi_percentage"
+                        name="cdi_percentage" />
+                </div>
+
+                <div class="price-currency-group">
+                    <label for="edit-status">Status:</label>
+                    <select id="edit-status" [(ngModel)]="newInvestment.status" name="status">
+                        <option value="active">Ativo</option>
+                        <option value="redeemed">Resgatado</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="notes-container">
+                <label for="edit-notes">Observações:</label>
+                <input id="edit-notes" [(ngModel)]="newInvestment.notes" name="notes" />
+            </div>
+
+            <div class="history-section">
+                <label class="history-title">Histórico de Movimentações:</label>
+                <div class="history-list-container">
+                    @if (selectedInvestmentForHistory?.history && selectedInvestmentForHistory!.history!.length > 0) {
+                    @for (tx of selectedInvestmentForHistory!.history!.slice().reverse(); track tx.id) {
+                    <div class="history-item" [ngClass]="tx.amount >= 0 ? 'deposit' : 'withdrawal'">
+                        <div class="history-info">
+                            <span class="history-date">{{ tx.timestamp | date:'dd/MM/yyyy HH:mm' }}</span>
+                            <p class="history-note">{{ tx.note || (tx.amount >= 0 ? 'Aporte' : 'Resgate') }}</p>
+                        </div>
+                        <div class="history-amount-container">
+                            <span class="history-amount">
+                                {{ tx.amount >= 0 ? '+' : '' }}{{ tx.amount / 100 | currency: 'BRL' : 'symbol' :
+                                undefined : 'pt-BR' }}
+                            </span>
+                        </div>
+                    </div>
+                    }
+                    } @else {
+                    <p class="empty-history">Nenhuma movimentação registrada.</p>
+                    }
+                </div>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; gap: 8px;">
+                <button type="submit" style="margin: 0 !important;" [disabled]="isSubmitting">
+                    {{ isSubmitting ? 'Salvando...' : 'Salvar' }}
+                </button>
+                <button type="button" (click)="deleteInvestment(editingInvestmentId!)"
+                    [disabled]="isSubmitting || !editingInvestmentId" class="delete-button">
+                    {{ isSubmitting ? 'Apagando...' : 'Apagar' }}
+                </button>
+            </div>
+        </form>
+
+        @if (isSubmitting) {
+        <div class="loader-overlay">
+            <div class="spinner"></div>
+        </div>
+        }
+    </section>
+
+    <!-- Modal: Transação (Aporte / Resgate) -->
+    <section style="display: none;" class="transaction-investment-section">
+        <div class="transaction-investment-header">
+            <h2>Movimentar Investimento</h2>
+            <button class="close-button" (click)="closeTransactionForm()">
+                <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px"
+                    fill="#2c2c2c">
+                    <path
+                        d="m256-200-56-56 224-224-224-224 56-56 224 224 224-224 56 56-224 224 224 224-56 56-224-224-224 224Z" />
+                </svg>
+            </button>
+        </div>
+
+        @if (selectedInvestmentForTransaction) {
+        <p style="margin-bottom: 16px;"><strong>{{ selectedInvestmentForTransaction.name }}</strong></p>
+        }
+
+        <form>
+            <div class="price-currency-container">
+                <div class="price-currency-group">
+                    <label for="transaction-amount">Valor da Movimentação:</label>
+                    <input id="transaction-amount" type="text" inputmode="decimal"
+                        [(ngModel)]="transactionPayload.amount" name="amount" appCurrencyMask required />
+                </div>
+            </div>
+
+            <div class="notes-container">
+                <label for="transaction-note">Descrição / Nota:</label>
+                <input id="transaction-note" [(ngModel)]="transactionPayload.note" name="note"
+                    placeholder="Ex: Aporte mensal" />
+            </div>
+
+            <div style="display: flex; justify-content: space-between; gap: 8px; margin-top: 16px;">
+                <button type="button" (click)="submitTransaction(true)" [disabled]="isSubmitting"
+                    style="background-color: #2e7d32;">
+                    + Adicionar (Aporte)
+                </button>
+                <button type="button" (click)="submitTransaction(false)" [disabled]="isSubmitting"
+                    class="delete-button">
+                    - Retirar (Resgate)
+                </button>
+            </div>
+        </form>
+
+        @if (isSubmitting) {
+        <div class="loader-overlay">
+            <div class="spinner"></div>
+        </div>
+        }
+    </section>
+</section>
+
+<!-- Modals de Sucesso -->
+@if (showSuccess) {
+<div class="success-modal">
+    <div class="success-modal-backdrop"></div>
+    <div class="success-modal-content">
+        <p>Investimento adicionado com sucesso!</p>
+        <button (click)="showSuccess = false">OK</button>
+    </div>
+</div>
+}
+
+@if (showUpdateSuccess) {
+<div class="success-modal">
+    <div class="success-modal-backdrop"></div>
+    <div class="success-modal-content">
+        <p>Investimento alterado com sucesso!</p>
+        <button (click)="showUpdateSuccess = false">OK</button>
+    </div>
+</div>
+}
+
+@if (showDeleteSuccess) {
+<div class="success-modal">
+    <div class="success-modal-backdrop"></div>
+    <div class="success-modal-content">
+        <p>Investimento apagado com sucesso!</p>
+        <button (click)="showDeleteSuccess = false">OK</button>
+    </div>
+</div>
+}
+
+@if (showTransactionSuccess) {
+<div class="success-modal">
+    <div class="success-modal-backdrop"></div>
+    <div class="success-modal-content">
+        <p>Movimentação registrada com sucesso!</p>
+        <button (click)="showTransactionSuccess = false">OK</button>
+    </div>
+</div>
+}

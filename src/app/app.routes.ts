@@ -12,6 +12,7 @@ import { SettingsComponent } from './pages/settings/settings.component';
 import { AdvancedsettingsComponent } from './pages/advancedsettings/advancedsettings.component';
 import { SupportComponent } from './pages/support/support.component';
 import { IncomeComponent } from './pages/income/income.component';
+import { InvestmentsPageComponent } from './pages/investments/investments.component';
 
 export const routes: Routes = [
     {
@@ -29,6 +30,7 @@ export const routes: Routes = [
             { path: '', component: HomeComponent },
             { path: 'income', component: IncomeComponent },
             { path: 'subscriptions', component: SubsComponent },
+            { path: 'investments', component: InvestmentsPageComponent },
             { path: 'standalonepayments', component: SapsComponent },
             { path: 'profile', component: ProfileComponent },
             { path: 'cards', component: CardsComponent },
