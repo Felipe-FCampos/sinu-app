@@ -1,4 +1,3 @@
-
 import { Component, OnInit } from '@angular/core';
 import { CommonModule, registerLocaleData } from '@angular/common';
 import localePt from '@angular/common/locales/pt';
@@ -45,6 +44,9 @@ export class InvestmentsComponent implements OnInit {
   public editingInvestmentId: string | null = null;
   public selectedInvestmentForTransaction: Investment | null = null;
 
+  public transactionTab: 'transaction' | 'yield' = 'transaction';
+  public newTotalBalance: number = 0;
+
   public isSortedByValue = false;
   public activeStatusFilters: string[] = [];
 
@@ -74,6 +76,7 @@ export class InvestmentsComponent implements OnInit {
   };
 
   public transactionPayload: AddTransactionPayload = {
+    type: 'deposit',
     amount: 0,
     note: ''
   };
@@ -95,9 +98,12 @@ export class InvestmentsComponent implements OnInit {
 
   resetTransactionPayload() {
     this.transactionPayload = {
+      type: 'deposit',
       amount: 0,
       note: ''
     };
+    this.newTotalBalance = 0;
+    this.transactionTab = 'transaction';
   }
 
   listInvestments() {
@@ -280,11 +286,12 @@ export class InvestmentsComponent implements OnInit {
     });
   }
 
-  // --- Modal: Transação / Aporte ---
+  // --- Modal: Transação / Aporte / Rendimento ---
   openTransactionForm(investment: Investment, event: Event) {
     event.stopPropagation();
     this.selectedInvestmentForTransaction = investment;
     this.resetTransactionPayload();
+    this.newTotalBalance = investment.final_value;
 
     const modal = document.querySelector('.transaction-investment-section') as HTMLElement;
     const backdrop = document.querySelector('.div_background_modal') as HTMLElement;
@@ -302,18 +309,17 @@ export class InvestmentsComponent implements OnInit {
     this.resetTransactionPayload();
   }
 
-  submitTransaction(isAporte: boolean) {
+  submitTransaction(type: 'deposit' | 'withdrawal') {
     if (!this.selectedInvestmentForTransaction) return;
 
     const rawAmount = Math.abs(this.transactionPayload.amount);
     if (rawAmount === 0) return;
 
-    const finalAmount = isAporte ? rawAmount : -rawAmount;
-
     this.isSubmitting = true;
 
     this.investmentsService.addTransaction(this.selectedInvestmentForTransaction.id, {
-      amount: finalAmount,
+      type: type,
+      amount: rawAmount,
       note: this.transactionPayload.note
     }).subscribe({
       next: () => {
@@ -326,6 +332,34 @@ export class InvestmentsComponent implements OnInit {
         console.error('Erro ao registrar transação:', err);
         this.isSubmitting = false;
         alert(err.error?.detail || 'Erro ao registrar movimentação.');
+      }
+    });
+  }
+
+  submitYieldUpdate() {
+    if (!this.selectedInvestmentForTransaction) return;
+
+    if (this.newTotalBalance === this.selectedInvestmentForTransaction.final_value) {
+      alert('O novo saldo deve ser diferente do saldo atual.');
+      return;
+    }
+
+    this.isSubmitting = true;
+
+    this.investmentsService.updateYieldByBalance(this.selectedInvestmentForTransaction.id, {
+      new_total_balance: this.newTotalBalance,
+      note: this.transactionPayload.note
+    }).subscribe({
+      next: () => {
+        this.listInvestments();
+        this.isSubmitting = false;
+        this.closeTransactionForm();
+        this.showTransactionSuccess = true;
+      },
+      error: (err) => {
+        console.error('Erro ao atualizar saldo de rendimento:', err);
+        this.isSubmitting = false;
+        alert(err.error?.detail || 'Erro ao atualizar saldo.');
       }
     });
   }

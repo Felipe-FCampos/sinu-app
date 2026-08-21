@@ -360,7 +360,8 @@
 }
 
 .close-button {
-    background-color: transparent;
+    background-color: transparent !important;
+    max-width: 32px !important;
     border-radius: 50%;
     border: none;
     cursor: pointer;
@@ -492,4 +493,58 @@
     color: #888;
     text-align: center;
     margin: 12px 0;
+}
+
+/* Seletor de Abas no Modal de Movimentação */
+.transaction-type-selector {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 16px;
+    border-bottom: 1px solid #e0e0e0;
+    padding-bottom: 8px;
+
+    button {
+        flex: 1;
+        background: transparent;
+        color: #666;
+        border: 1px solid #ddd;
+        padding: 8px 12px;
+        border-radius: 6px;
+        font-size: 12px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+
+        &.active {
+            background-color: #2c2c2c;
+            color: #ffffff;
+            border-color: #2c2c2c;
+        }
+    }
+}
+
+.balance-summary-info {
+    font-size: 13px;
+    margin-bottom: 12px;
+    color: #444;
+}
+
+.yield-preview {
+    font-size: 13px;
+    margin-top: 8px;
+    margin-bottom: 12px;
+    padding: 8px 12px;
+    background-color: #f5f5f5;
+    border-radius: 6px;
+}
+
+/* Suporte visual para Rendimento no Histórico */
+.history-item {
+    &.yield {
+        border-left-color: #0288d1;
+
+        .history-amount {
+            color: #0288d1;
+        }
+    }
 }

@@ -6,7 +6,9 @@ import { Observable } from 'rxjs';
 
 export interface InvestmentTransaction {
   id: string;
+  type: 'deposit' | 'withdrawal' | 'yield';
   amount: number;
+  balance_before?: number;
   balance_after: number;
   timestamp: string;
   note?: string;
@@ -43,7 +45,13 @@ export interface UpdateInvestmentPayload {
 }
 
 export interface AddTransactionPayload {
+  type: 'deposit' | 'withdrawal' | 'yield';
   amount: number;
+  note?: string;
+}
+
+export interface YieldUpdatePayload {
+  new_total_balance: number;
   note?: string;
 }
 
@@ -84,6 +92,10 @@ export class InvestmentsService {
 
   addTransaction(id: string, payload: AddTransactionPayload): Observable<any> {
     return this.http.post(`${this.apiUrl}/investments/${id}/transaction`, payload, this.headers);
+  }
+
+  updateYieldByBalance(id: string, payload: YieldUpdatePayload): Observable<any> {
+    return this.http.post(`${this.apiUrl}/investments/${id}/yield-update`, payload, this.headers);
   }
 
   deleteInvestment(id: string): Observable<any> {

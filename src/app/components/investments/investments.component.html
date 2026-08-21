@@ -41,7 +41,7 @@
         </div>
 
         <div class="investment-footer-action" (click)="openTransactionForm(investment, $event)">
-            Movimentar (Aporte / Resgate)
+            Movimentar (Aporte / Resgate / Rendimento)
         </div>
     </div>
     }
@@ -183,9 +183,11 @@
                 <div class="history-list-container">
                     @if (selectedInvestmentForHistory?.history && selectedInvestmentForHistory!.history!.length > 0) {
                     @for (tx of selectedInvestmentForHistory!.history!.slice().reverse(); track tx.id) {
-                    <div class="history-item" [ngClass]="tx.amount >= 0 ? 'deposit' : 'withdrawal'">
+                    <div class="history-item" [ngClass]="tx.type || (tx.amount >= 0 ? 'deposit' : 'withdrawal')">
                         <div class="history-info">
-                            <span class="history-date">{{ tx.timestamp | date:'dd/MM/yyyy HH:mm' }}</span>
+                            <span class="history-date">{{ tx.timestamp | date:'dd/MM/yyyy HH:mm' }} <b>{{
+                                tx.balance_before ? "| " + (tx.balance_before! / 100 | currency:'BRL':'symbol':'1.2-2':'pt-BR')
+                                : '' }}</b> </span>
                             <p class="history-note">{{ tx.note || (tx.amount >= 0 ? 'Aporte' : 'Resgate') }}</p>
                         </div>
                         <div class="history-amount-container">
@@ -220,7 +222,7 @@
         }
     </section>
 
-    <!-- Modal: Transação (Aporte / Resgate) -->
+    <!-- Modal: Transação (Aporte / Resgate / Rendimento) -->
     <section style="display: none;" class="transaction-investment-section">
         <div class="transaction-investment-header">
             <h2>Movimentar Investimento</h2>
@@ -234,9 +236,22 @@
         </div>
 
         @if (selectedInvestmentForTransaction) {
-        <p style="margin-bottom: 16px;"><strong>{{ selectedInvestmentForTransaction.name }}</strong></p>
+        <p style="margin-bottom: 12px;"><strong>{{ selectedInvestmentForTransaction.name }}</strong></p>
         }
 
+        <!-- Seletor de Tipo de Movimentação -->
+        <div class="transaction-type-selector">
+            <button type="button" [class.active]="transactionTab === 'transaction'"
+                (click)="transactionTab = 'transaction'">
+                Aporte / Resgate
+            </button>
+            <button type="button" [class.active]="transactionTab === 'yield'" (click)="transactionTab = 'yield'">
+                Atualizar Saldo (Rendimento)
+            </button>
+        </div>
+
+        <!-- Conteúdo Aba 1: Aporte / Resgate Direto -->
+        @if (transactionTab === 'transaction') {
         <form>
             <div class="price-currency-container">
                 <div class="price-currency-group">
@@ -253,16 +268,60 @@
             </div>
 
             <div style="display: flex; justify-content: space-between; gap: 8px; margin-top: 16px;">
-                <button type="button" (click)="submitTransaction(true)" [disabled]="isSubmitting"
+                <button type="button" (click)="submitTransaction('deposit')" [disabled]="isSubmitting"
                     style="background-color: #2e7d32;">
-                    + Adicionar (Aporte)
+                    + Aporte
                 </button>
-                <button type="button" (click)="submitTransaction(false)" [disabled]="isSubmitting"
+                <button type="button" (click)="submitTransaction('withdrawal')" [disabled]="isSubmitting"
                     class="delete-button">
-                    - Retirar (Resgate)
+                    - Resgate
                 </button>
             </div>
         </form>
+        }
+
+        <!-- Conteúdo Aba 2: Atualização por Saldo Atual (Rendimento) -->
+        @if (transactionTab === 'yield') {
+        <form (ngSubmit)="submitYieldUpdate()">
+            <div class="balance-summary-info">
+                <p>Saldo Anterior: <strong>{{ selectedInvestmentForTransaction?.final_value! / 100 | currency: 'BRL' :
+                        'symbol' : undefined : 'pt-BR' }}</strong></p>
+            </div>
+
+            <div class="price-currency-container">
+                <div class="price-currency-group">
+                    <label for="new-total-balance">Novo Saldo Atual:</label>
+                    <input id="new-total-balance" type="text" inputmode="decimal" [(ngModel)]="newTotalBalance"
+                        name="newTotalBalance" appCurrencyMask required />
+                </div>
+            </div>
+
+            @if (newTotalBalance && selectedInvestmentForTransaction) {
+            <div class="yield-preview">
+                <p>Variação Calculada:
+                    <strong
+                        [style.color]="(newTotalBalance - selectedInvestmentForTransaction.final_value) >= 0 ? '#2e7d32' : '#d32f2f'">
+                        {{ (newTotalBalance - selectedInvestmentForTransaction.final_value) >= 0 ? '+' : '' }}
+                        {{ (newTotalBalance - selectedInvestmentForTransaction.final_value) / 100 | currency: 'BRL' :
+                        'symbol' : undefined : 'pt-BR' }}
+                    </strong>
+                </p>
+            </div>
+            }
+
+            <div class="notes-container">
+                <label for="yield-note">Descrição / Nota (opcional):</label>
+                <input id="yield-note" [(ngModel)]="transactionPayload.note" name="yieldNote"
+                    placeholder="Ex: Rendimento mensal CDB" />
+            </div>
+
+            <div style="margin-top: 16px;">
+                <button type="submit" [disabled]="isSubmitting">
+                    Atualizar Saldo
+                </button>
+            </div>
+        </form>
+        }
 
         @if (isSubmitting) {
         <div class="loader-overlay">
